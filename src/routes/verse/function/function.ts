@@ -1,23 +1,20 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import db from "../../../libs/db";
-import { versesInSurahs } from "../types/utility";
 import type { getVerseReplySchema, getVerseSchema } from "../types/types";
 import {
-  AvailableLangCodes,
   HTTP_INTERNAL_SERVER_ERROR_CODE,
-  HTTP_NOT_FOUND_CODE,
   HTTP_OK_CODE,
   InternalServerErrorResponse,
-  NotFoundResponse,
 } from "../../utility";
 import type {
   InternalServerErrorSchema,
   NotFoundResponseSchema,
 } from "../../types";
+import type { z } from "zod";
 
 export async function getVerse(
   request: FastifyRequest<{
-    Params: getVerseSchema;
+    Params: z.infer<typeof getVerseSchema>;
     Reply:
       | NotFoundResponseSchema
       | InternalServerErrorSchema
@@ -26,12 +23,6 @@ export async function getVerse(
   response: FastifyReply
 ): Promise<void> {
   const { surahNumber, verseNumber, langCode } = request.params;
-
-  if (
-    !(versesInSurahs[surahNumber - 1] >= verseNumber === true ? true : false) ||
-    (langCode && !AvailableLangCodes[langCode])
-  )
-    return response.code(HTTP_NOT_FOUND_CODE).send(NotFoundResponse);
 
   try {
     const queryString: string = `

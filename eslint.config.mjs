@@ -26,7 +26,6 @@ export default [
       },
     },
     rules: {
-      semi: ["error", "always"],
       indent: ["error", 2],
       "no-var": "error",
       "prefer-const": "error",
@@ -51,10 +50,8 @@ export default [
       "no-debugger": "error",
       "no-undef": "error",
       "no-unused-expressions": "error",
-      "no-use-before-define": ["error", { functions: false, classes: true }],
       "no-redeclare": "error",
       "no-shadow": "error",
-      "consistent-return": "error",
       "no-magic-numbers": [
         "warn",
         { ignore: [0, 1], ignoreArrayIndexes: true },

@@ -40,3 +40,18 @@ export const HTTP_NOT_IMPLEMENTED_CODE = 501;
 export const HTTP_BAD_GATEWAY_CODE = 502;
 export const HTTP_SERVICE_UNAVAILABLE_CODE = 503;
 export const HTTP_GATEWAY_TIMEOUT_CODE = 504;
+
+// Constants
+
+export const MAX_PAGE_IN_QURAN = 604;
+export const LENGTH_OF_SMALLEST_ROOT = 3;
+export const LENGTH_OF_LONGEST_ROOT = 5;
+
+// Functionts
+
+export const langCodeRefineFunction = (
+  langCode: string | undefined | null
+): boolean => {
+  if (!langCode) return true;
+  return langCode in AvailableLangCodes;
+};
