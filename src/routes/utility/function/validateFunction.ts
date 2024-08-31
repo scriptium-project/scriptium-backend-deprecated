@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { ZodType } from "zod";
-import { HTTP_NOT_FOUND_CODE, NotFoundResponse } from "./utility";
-import type { AtLeastOneKeyGeneric } from "./types";
+import { HTTP_NOT_FOUND_CODE, NotFoundResponse } from "../types/utility";
+import type { AtLeastOneKeyGeneric } from "../types/types";
 
 export const validateFunction = ({
   RouteParams,

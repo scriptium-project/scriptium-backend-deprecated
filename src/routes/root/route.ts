@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { getRoot } from "./function/function";
-import { validateFunction } from "../function";
-import { getRootSchema } from "./types/types";
+import { getRoot } from "./function/getRoot";
+import { validateFunction } from "../utility/function/validateFunction";
+import { getRootSchema } from "./types/getRootSchema";
 
 export default function rootRoute(
   server: FastifyInstance,

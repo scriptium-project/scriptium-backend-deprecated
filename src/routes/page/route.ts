@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { getPage } from "./function/function";
-import { getPageSchema } from "./types/types";
-import { validateFunction } from "../function";
+import { getPage } from "./function/getPage";
+import { validateFunction } from "../utility/function/validateFunction";
+import { getPageSchema } from "./types/getPageSchema";
 
 export default function pageRoute(
   server: FastifyInstance,

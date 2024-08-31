@@ -5,7 +5,7 @@ dotenv.config();
 
 const defaultPort: number = 5432;
 
-const db = new Pool({
+const db: Pool = new Pool({
   user: process.env.DATABASE_USERNAME,
   host: process.env.DATABASE_HOST || "localhost",
   database: process.env.DATABASE_NAME,

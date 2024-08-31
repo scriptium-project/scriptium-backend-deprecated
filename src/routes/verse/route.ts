@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { getVerse } from "./function/function";
-import { validateFunction } from "../function";
-import { getVerseSchema } from "./types/types";
+import { getVerse } from "./function/getVerse";
+import { validateFunction } from "../utility/function/validateFunction";
+import { getVerseSchema } from "./types/getVerseSchema";
 
 export default function verseRoute(
   server: FastifyInstance,

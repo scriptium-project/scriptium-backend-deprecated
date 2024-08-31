@@ -1,25 +1,27 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { getRootResponseSchema, getRootSchema } from "../types/types";
-import db from "../../../libs/db";
+import db from "../../../libs/db/db";
 import {
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   HTTP_NOT_FOUND_CODE,
   HTTP_OK_CODE,
   InternalServerErrorResponse,
   NotFoundResponse,
-} from "../../utility";
-import type { InternalServerErrorSchema } from "../../types";
+} from "../../utility/types/utility";
 import type { z } from "zod";
+import type { NegativeResponse } from "../../utility/types/types";
+import type { getRootResponseSchema } from "../types/types";
+import type { getRootSchema } from "../types/getRootSchema";
 
 export async function getRoot(
   request: FastifyRequest<{
     Params: z.infer<typeof getRootSchema>;
-    Reply: getRootResponseSchema | InternalServerErrorSchema;
+    Reply: getRootResponseSchema | NegativeResponse;
   }>,
   response: FastifyReply
 ): Promise<void> {
   const { rootLatin } = request.params;
 
+  //TODO: Create View
   try {
     const queryString: string = `
   SELECT 

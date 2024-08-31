@@ -1,23 +1,24 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { getPageResponseSchema, getPageSchema } from "../types/types";
-import db from "../../../libs/db";
-import type { InternalServerErrorSchema } from "../../types";
+import db from "../../../libs/db/db";
 import {
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   HTTP_OK_CODE,
   InternalServerErrorResponse,
-} from "../../utility";
+} from "../../utility/types/utility";
 import type { z } from "zod";
+import type { NegativeResponse } from "../../utility/types/types";
+import type { getPageSchema } from "../types/getPageSchema";
+import type { getPageResponseSchema } from "../types/types";
 
 export async function getPage(
   request: FastifyRequest<{
     Params: z.infer<typeof getPageSchema>;
-    Reply: getPageResponseSchema | InternalServerErrorSchema;
+    Reply: getPageResponseSchema | NegativeResponse;
   }>,
   response: FastifyReply
 ): Promise<void> {
   const { pageNumber, langCode } = request.params;
-
+  // TODO:Create View
   try {
     const queryString: string = `
 	    						SELECT v.pageNumber as page_number,

@@ -1,29 +1,25 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import db from "../../../libs/db";
-import type { getVerseReplySchema, getVerseSchema } from "../types/types";
+import db from "../../../libs/db/db";
+import type { getVerseReplySchema } from "../types/types";
+import type { z } from "zod";
+import type { getVerseSchema } from "../types/getVerseSchema";
 import {
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   HTTP_OK_CODE,
   InternalServerErrorResponse,
-} from "../../utility";
-import type {
-  InternalServerErrorSchema,
-  NotFoundResponseSchema,
-} from "../../types";
-import type { z } from "zod";
+} from "../../utility/types/utility";
+import type { NegativeResponse } from "../../utility/types/types";
 
 export async function getVerse(
   request: FastifyRequest<{
     Params: z.infer<typeof getVerseSchema>;
-    Reply:
-      | NotFoundResponseSchema
-      | InternalServerErrorSchema
-      | getVerseReplySchema;
+    Reply: getVerseReplySchema | NegativeResponse;
   }>,
   response: FastifyReply
 ): Promise<void> {
   const { surahNumber, verseNumber, langCode } = request.params;
 
+  //TODO: Create View
   try {
     const queryString: string = `
 								SELECT 

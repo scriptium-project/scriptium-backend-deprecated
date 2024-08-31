@@ -1,18 +1,9 @@
-export const NotFoundResponse = {
-  err: "Not Found.",
-  code: 404,
-};
+import type { NegativeResponse } from "./types";
+import dotenv from "dotenv";
 
-export const InternalServerErrorResponse = {
-  err: "Internal Server Error.",
-  code: 500,
-};
+dotenv.config();
 
-export const AvailableLangCodes = {
-  en: "English",
-  tr: "Turkish",
-  de: "German",
-} as const;
+if (!process.env.BCRYPT_SALT_NUMBER) throw new Error("Something went wrong!");
 
 export const HTTP_OK_CODE = 200;
 export const HTTP_CREATED_CODE = 201;
@@ -44,8 +35,11 @@ export const HTTP_GATEWAY_TIMEOUT_CODE = 504;
 // Constants
 
 export const MAX_PAGE_IN_QURAN = 604;
+
 export const LENGTH_OF_SMALLEST_ROOT = 3;
 export const LENGTH_OF_LONGEST_ROOT = 5;
+
+export const BCRYPT_SALT_NUMBER = +process.env.BCRYPT_SALT_NUMBER;
 
 // Functionts
 
@@ -55,3 +49,26 @@ export const langCodeRefineFunction = (
   if (!langCode) return true;
   return langCode in AvailableLangCodes;
 };
+
+// Possible Responses
+
+export const NotFoundResponse: NegativeResponse = {
+  err: "Not Found.",
+  code: HTTP_NOT_FOUND_CODE,
+};
+
+export const InternalServerErrorResponse: NegativeResponse = {
+  err: "Internal Server Error.",
+  code: HTTP_INTERNAL_SERVER_ERROR_CODE,
+};
+
+export const SomethingWentWrongResponse: NegativeResponse = {
+  err: "Something went wrong.",
+  code: HTTP_UNAUTHORIZED_CODE,
+};
+
+export const AvailableLangCodes = {
+  en: "English",
+  tr: "Turkish",
+  de: "German",
+} as const;

@@ -136,3 +136,25 @@ CREATE TABLE surahMeaning(
     Foreign Key (surahId) REFERENCES surahs(Id),
     UNIQUE(langCode, surahId)
 )
+
+CREATE TABLE sessions (
+    id VARCHAR(100) NOT NULL PRIMARY KEY,   
+    expires_at TIMESTAMPTZ,
+    user_id UUID,
+    session JSONB NOT NULL    
+);
+
+
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username VARCHAR(24) UNIQUE NOT NULL,
+  name VARCHAR(30) NOT NULL,
+  surname VARCHAR(30) NOT NULL,
+  gender CHAR(1),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  email_verified TIMESTAMPTZ,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ,
+  last_active TIMESTAMPTZ,
+  is_frozen BOOLEAN NOT NULL
+);
