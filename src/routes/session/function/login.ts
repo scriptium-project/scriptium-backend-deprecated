@@ -9,21 +9,25 @@ import {
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
-} from "../../utility/types/utility";
+} from "../../../libs/utility/types/utility";
 import { BadCredentialsResponse, LoggedInResponse } from "../types/utility";
-import type { NegativeResponse, PositiveResponse } from "../../utility/types/types";
+import type {
+  NegativeResponse,
+  PositiveResponse,
+} from "../../../libs/utility/types/types";
 
 export const login = async (
   request: FastifyRequest<{
     Body: z.infer<typeof loginSchema>;
-    Reply: PositiveResponse | NegativeResponse
+    Reply: PositiveResponse | NegativeResponse;
   }>,
   response: FastifyReply
 ): Promise<void> => {
   const { username, email, password } = request.body;
-  try {
-    const queryString: string = `SELECT * FROM users WHERE username = $1 OR email = $2`;
 
+  const queryString = 'SELECT * FROM "user" WHERE username = $1 OR email = $2';
+
+  try {
     const [user] = (await db.query<User>(queryString, [username, email])).rows;
 
     if (!user)

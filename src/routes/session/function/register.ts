@@ -2,7 +2,6 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
 import type { registerSchema } from "../types/registerSchema";
 import db from "../../../libs/db/db";
-import type { RowCountType } from "../types/utility";
 import {
   UserCreatedResponse,
   UsernameOrEmailAlreadyInUseResponse,
@@ -16,11 +15,12 @@ import {
   HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
   SomethingWentWrongResponse,
-} from "../../utility/types/utility";
+} from "../../../libs/utility/types/utility";
 import type {
   NegativeResponse,
   PositiveResponse,
-} from "../../utility/types/types";
+} from "../../../libs/utility/types/types";
+import type { RowCountType } from "../types/types";
 
 export const register = async (
   request: FastifyRequest<{
@@ -30,7 +30,8 @@ export const register = async (
   response: FastifyReply
 ): Promise<void> => {
   const { username, name, surname, email, password, gender } = request.body;
-  let queryString: string = `SELECT COUNT(*)::INTEGER as row_count FROM users WHERE username = $1 OR email = $2`;
+
+  let queryString: string = `SELECT COUNT(*)::INTEGER as row_count FROM "user" WHERE username = $1 OR email = $2`;
 
   try {
     const [{ row_count }] = (
@@ -42,7 +43,8 @@ export const register = async (
         .code(HTTP_CONFLICT_CODE)
         .send(UsernameOrEmailAlreadyInUseResponse);
 
-    queryString = `INSERT INTO users (username, name, surname,gender, email,password,created_at, is_frozen) VALUES ($1,$2,$3,$4,$5,$6, NOW(), false)`;
+    queryString = `INSERT INTO "user" (username, name, surname, gender, email,password, is_frozen) VALUES ($1,$2,$3,$4,$5,$6, false)`;
+
     const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT_NUMBER);
 
     const registerRowCount = (
@@ -56,7 +58,7 @@ export const register = async (
       ])
     ).rowCount;
 
-    if (registerRowCount === 0)
+    if (!registerRowCount)
       return response
         .code(HTTP_UNAUTHORIZED_CODE)
         .send(SomethingWentWrongResponse);

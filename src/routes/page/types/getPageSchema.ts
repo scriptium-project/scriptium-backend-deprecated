@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   langCodeRefineFunction,
   MAX_PAGE_IN_QURAN,
-} from "../../utility/types/utility";
+} from "../../../libs/utility/types/utility";
 
 export const getPageSchema = z.object({
   pageNumber: z

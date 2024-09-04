@@ -8,3 +8,5 @@ export const versesInSurahs: number[] = [
   56, 40, 31, 50, 40, 46, 42, 29, 19, 36, 25, 22, 17, 19, 26, 30, 20, 15, 21,
   11, 8, 8, 19, 5, 8, 8, 11, 11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6,
 ] as const;
+
+export const CHAPTER_COUNT = versesInSurahs.length;

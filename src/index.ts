@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import fastify from "fastify";
 import verseRoute from "./routes/verse/route";
-import { HTTP_ACCEPTED_CODE } from "./routes/utility/types/utility";
+import { HTTP_ACCEPTED_CODE } from "./libs/utility/types/utility";
 import pageRoute from "./routes/page/route";
 import rootRoute from "./routes/root/route";
 import fastifyCookie from "@fastify/cookie";
@@ -29,19 +29,19 @@ server.get("/ping", {
   handler: async (request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(HTTP_ACCEPTED_CODE).send({
       msg: "done",
-      user: request.user,
-      session: request.session.sessionId,
+      ip: request.ip,
     });
   },
 });
 
-//This function is on the puspose of testing!
+//This function is on the purpose of testing!
 server.get("/pong", {
   handler: async (request: FastifyRequest, reply: FastifyReply) => {
     return reply.code(HTTP_ACCEPTED_CODE).send({
       msg: "done",
-      user: request.user,
       session: request.session.sessionId,
+      user: request.user,
+      role: request.user?.role_id,
     });
   },
 });

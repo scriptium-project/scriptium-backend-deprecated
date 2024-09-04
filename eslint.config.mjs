@@ -51,7 +51,6 @@ export default [
       "no-undef": "error",
       "no-unused-expressions": "error",
       "no-redeclare": "error",
-      "no-shadow": "error",
       "no-magic-numbers": [
         "warn",
         { ignore: [0, 1], ignoreArrayIndexes: true },

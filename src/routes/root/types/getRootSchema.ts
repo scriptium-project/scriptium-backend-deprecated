@@ -1,9 +1,6 @@
 import { z } from "zod";
-import {
-  langCodeRefineFunction,
-  LENGTH_OF_LONGEST_ROOT,
-  LENGTH_OF_SMALLEST_ROOT,
-} from "../../utility/types/utility";
+import { langCodeRefineFunction } from "../../../libs/utility/types/utility";
+import { LENGTH_OF_LONGEST_ROOT, LENGTH_OF_SMALLEST_ROOT } from "./utility";
 
 export const getRootSchema = z.object({
   rootLatin: z

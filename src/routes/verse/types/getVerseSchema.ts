@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { langCodeRefineFunction } from "../../utility/types/utility";
-import { versesInSurahs } from "./utility";
+import { langCodeRefineFunction } from "../../../libs/utility/types/utility";
+import { CHAPTER_COUNT, versesInSurahs } from "./utility";
 
 export const getVerseSchema = z
   .object({
@@ -16,7 +16,7 @@ export const getVerseSchema = z
       .refine((val: number) => !isNaN(val), {
         message: "surahNumber must be a valid number",
       })
-      .refine((val: number) => val > 0 && val <= versesInSurahs.length, {
+      .refine((val: number) => val > 0 && val <= CHAPTER_COUNT, {
         message: "surahNumber must be between 1 and 114",
       }),
     langCode: z.string().min(1).optional().refine(

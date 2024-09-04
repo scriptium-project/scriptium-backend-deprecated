@@ -1,4 +1,4 @@
-import type { NegativeResponse } from "./types";
+import type { NegativeResponse, PositiveResponse } from "./types";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -36,12 +36,9 @@ export const HTTP_GATEWAY_TIMEOUT_CODE = 504;
 
 export const MAX_PAGE_IN_QURAN = 604;
 
-export const LENGTH_OF_SMALLEST_ROOT = 3;
-export const LENGTH_OF_LONGEST_ROOT = 5;
-
 export const BCRYPT_SALT_NUMBER = +process.env.BCRYPT_SALT_NUMBER;
 
-// Functionts
+// Functions
 
 export const langCodeRefineFunction = (
   langCode: string | undefined | null
@@ -65,6 +62,26 @@ export const InternalServerErrorResponse: NegativeResponse = {
 export const SomethingWentWrongResponse: NegativeResponse = {
   err: "Something went wrong.",
   code: HTTP_UNAUTHORIZED_CODE,
+};
+
+export const AlreadyCreatedResponse: NegativeResponse = {
+  err: "Already has been created!",
+  code: HTTP_CONFLICT_CODE,
+};
+
+export const CreatedResponse: PositiveResponse = {
+  msg: "Created!",
+  code: HTTP_CREATED_CODE,
+};
+
+export const DoneResponse: PositiveResponse = {
+  msg: "Done!",
+  code: HTTP_OK_CODE,
+};
+
+export const FailedResponse: NegativeResponse = {
+  err: "Failed!",
+  code: HTTP_BAD_REQUEST_CODE,
 };
 
 export const AvailableLangCodes = {

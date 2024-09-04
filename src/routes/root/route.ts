@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { getRoot } from "./function/getRoot";
-import { validateFunction } from "../utility/function/validateFunction";
+import { validateFunction } from "../../libs/utility/function/validateFunction";
 import { getRootSchema } from "./types/getRootSchema";
+import { cacheCheckFunction } from "../../libs/utility/function/cacheCheckFunction";
 
 export default function rootRoute(
   server: FastifyInstance,
@@ -10,6 +11,7 @@ export default function rootRoute(
 ): void {
   server.get("/root/:rootLatin/:langCode?", {
     preValidation: validateFunction({ RouteParams: getRootSchema }),
+    preHandler: cacheCheckFunction,
     handler: getRoot,
   });
 

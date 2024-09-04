@@ -1,3 +1,5 @@
+import { FastifyRequest, RouteGenericInterface } from "fastify";
+
 /**
  *  A comprehensive type for regular negative responses.
  */

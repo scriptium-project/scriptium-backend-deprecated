@@ -1,7 +1,7 @@
 import type { FastifyRegisterOptions, Session } from "fastify";
 import db from "../db/db";
 import dotenv from "dotenv";
-import type { FastifySessionOptions } from "@fastify/session";
+import type { FastifySessionOptions, SessionStore } from "@fastify/session";
 
 dotenv.config();
 
@@ -9,7 +9,7 @@ export const secretKey = process.env.SESSION_STORAGE_SECRET_KEY;
 
 if (!secretKey) throw new Error("Session storage key is undefined.");
 
-export const sessionStorage = {
+const sessionStorage: SessionStore = {
   get: (
     sessionId: string,
     callback: (err: unknown, result?: Session | null) => void
@@ -22,7 +22,7 @@ export const sessionStorage = {
       To prevent this situation, I need to access the “session” object, which is a subkey of the incoming data. We can avoid this by using this typing: { session: Session }
    */
     db.query<{ session: Session }>(
-      "SELECT session FROM sessions WHERE id = $1",
+      "SELECT session FROM session WHERE id = $1",
       [sessionId]
     )
       .then((result) => {
@@ -42,7 +42,7 @@ export const sessionStorage = {
     callback: (err?: unknown) => void
   ): void => {
     db.query(
-      "INSERT INTO sessions (id, expires_at, session) VALUES ($1, $2::TIMESTAMPTZ, $3) ON CONFLICT (id) DO UPDATE SET session = $3, expires_at = $2::TIMESTAMPTZ",
+      "INSERT INTO session (id, expires_at, session) VALUES ($1, $2::TIMESTAMPTZ, $3) ON CONFLICT (id) DO UPDATE SET session = $3, expires_at = $2::TIMESTAMPTZ",
       [sessionId, session.cookie.expires, session]
     )
       .then((result) => {
@@ -55,9 +55,8 @@ export const sessionStorage = {
         callback(error);
       });
   },
-
   destroy: (sessionId: string, callback: (err?: unknown) => void): void => {
-    db.query("DELETE FROM sessions WHERE id = $1", [sessionId])
+    db.query("DELETE FROM session WHERE id = $1", [sessionId])
       .then((result) => {
         if (result.rowCount === 0)
           throw new Error("Session could NOT been deleted.");
@@ -70,7 +69,7 @@ export const sessionStorage = {
   },
 };
 
-const MAX_AGE = 30000;
+const MAX_AGE = 864e5; //Milliseconds in one day.
 
 export const fastifySessionOptions: FastifyRegisterOptions<FastifySessionOptions> =
   {

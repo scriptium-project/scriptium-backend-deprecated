@@ -17,13 +17,13 @@ fastifyPassport.registerUserSerializer<UserWithoutPassword, SerializedUser>(
 );
 
 fastifyPassport.registerUserDeserializer<SerializedUser, UserWithoutPassword>(
-  async (id, _request) => {
+  async (id, request) => {
     try {
       const { rows } = await db.query<User>(
-        "SELECT * FROM users WHERE id = $1",
+        'SELECT * FROM "user" WHERE id = $1',
         [id]
       );
-      if (rows.length === 0) throw new Error("User not found!");
+      if (rows.length === 0) request.session.destroy();
 
       return { ...rows[0], password: undefined };
     } catch (error) {

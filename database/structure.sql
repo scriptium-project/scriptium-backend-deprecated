@@ -1,4 +1,4 @@
-CREATE TABLE surahs(  
+CREATE TABLE surah(  
     id SMALLSERIAL NOT NULL PRIMARY KEY,
     surahNameAr TEXT NOT NULL UNIQUE,
     verseCount SMALLINT NOT NULL,
@@ -6,15 +6,15 @@ CREATE TABLE surahs(
 );
 
 
-CREATE TABLE roots (
-    id SMALLSERIAL NOT NULL PRIMARY KEY,
+CREATE TABLE root (
+    id SERIAL NOT NULL PRIMARY KEY,
     latin VARCHAR(5) NOT NULL UNIQUE,
     arabic VARCHAR(5) NOT NULL UNIQUE,
     UNIQUE(latin, arabic)
 );
 
-CREATE TABLE verses(  
-    id SMALLSERIAL NOT NULL PRIMARY KEY,
+CREATE TABLE verse(  
+    id SERIAL NOT NULL PRIMARY KEY,
     verseNumber SMALLINT NOT NULL,
     text VARCHAR(1178) NOT NULL,
     textSimplified VARCHAR(1178) NOT NULL,
@@ -28,28 +28,28 @@ CREATE TABLE verses(
 
 
 
-CREATE TABLE words(
+CREATE TABLE word(
     id SERIAL NOT NULL PRIMARY KEY,
     sortNumber SMALLINT,
     text VARCHAR(22) NOT NULL,
     textNoVowel VARCHAR(22) NOT NULL,
-    verseId SMALLINT NOT NULL,
-    rootId SMALLINT,
+    verseid INTEGER NOT NULL,
+    rootId INTEGER,
     Foreign Key (rootId) REFERENCES roots(id) ON DELETE CASCADE ON UPDATE CASCADE,
     Foreign Key (verseId) REFERENCES verses(id) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE(sortNumber, verseId)
 );
 
-CREATE TABLE languages (
+CREATE TABLE language (
     id SMALLSERIAL NOT NULL PRIMARY KEY,
     langCode VARCHAR(2) NOT NULL UNIQUE,
     langOwn VARCHAR(20) NOT NULL UNIQUE,
     langEnglish VARCHAR(20) NOT NULL UNIQUE
 );
 
-INSERT INTO languages (langCode,langOwn,langEnglish) VALUES ('en','English','English');
-INSERT INTO languages (langCode,langOwn,langEnglish) VALUES ('de','Deutsch','German');
-INSERT INTO languages (langCode,langOwn,langEnglish) VALUES ('tr','Türkçe','Turkish');
+INSERT INTO language (langCode,langOwn,langEnglish) VALUES ('en','English','English');
+INSERT INTO language (langCode,langOwn,langEnglish) VALUES ('de','Deutsch','German');
+INSERT INTO language (langCode,langOwn,langEnglish) VALUES ('tr','Türkçe','Turkish');
 
 CREATE TABLE translator(
     id SMALLSERIAL NOT NULL PRIMARY KEY,
@@ -82,7 +82,7 @@ CREATE TABLE transliteration(
     id SERIAL PRIMARY KEY NOT NULL,
     langCode VARCHAR(2) NOT NULL,
     transliteration VARCHAR(1500) NOT NULL,
-    verseId SMALLSERIAL NOT NULL,
+    verseid INTEGER NOT NULL,
     Foreign Key (verseId) REFERENCES verses(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -101,29 +101,29 @@ CREATE TABLE translationText(
     id SERIAL NOT NULL PRIMARY KEY,
     translation TEXT NOT NULL,
     translationId SMALLINT NOT NULL,
-    verseId SMALLINT NOT NULL,
+    verseid INTEGER NOT NULL,
     Foreign Key (translationId) REFERENCES translation(id) ON DELETE CASCADE ON UPDATE CASCADE,
     Foreign Key (verseId) REFERENCES verses(id) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE(translation,translationId, verseId)
 )
 
-CREATE TABLE footnotesText(
+CREATE TABLE footnoteText(
     id SERIAL NOT NULL PRIMARY KEY,
     translationId SMALLINT NOT NULL,
     text TEXT NOT NULL,
 );
 
-CREATE UNIQUE INDEX unique_partial_text ON footnotesText (translationId, left(text, 2048));
+CREATE UNIQUE INDEX unique_partial_text ON footnoteText (translationId, left(text, 2048));
 
 
-CREATE TABLE footnotes(
+CREATE TABLE footnote(
     id SERIAL NOT NULL PRIMARY KEY,
     number SMALLINT NOT NULL,
     index SMALLINT NOT NULL,
     translationTextId INT NOT NULL,
     footnoteTextId INT NOT NULL,
     Foreign Key (translationTextId) REFERENCES translationtext(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    Foreign Key (footnoteTextId) REFERENCES footnotesText(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    Foreign Key (footnoteTextId) REFERENCES footnoteText(id) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE(translationTextId, index,footnoteTextId)
 )
 
@@ -137,15 +137,14 @@ CREATE TABLE surahMeaning(
     UNIQUE(langCode, surahId)
 )
 
-CREATE TABLE sessions (
+CREATE TABLE session (
     id VARCHAR(100) NOT NULL PRIMARY KEY,   
     expires_at TIMESTAMPTZ,
-    user_id UUID,
+    userId UUID,
     session JSONB NOT NULL    
 );
 
-
-CREATE TABLE users (
+CREATE TABLE "user"(
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   username VARCHAR(24) UNIQUE NOT NULL,
   name VARCHAR(30) NOT NULL,
@@ -154,7 +153,62 @@ CREATE TABLE users (
   email VARCHAR(255) UNIQUE NOT NULL,
   email_verified TIMESTAMPTZ,
   password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   last_active TIMESTAMPTZ,
-  is_frozen BOOLEAN NOT NULL
+  is_frozen BOOLEAN NOT NULL,
+  role_id SMALLINT,
+  Foreign Key (role_id) REFERENCES role(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
+
+CREATE table "role"(
+    id SMALLSERIAL PRIMARY KEY,
+    role VARCHAR(15) UNIQUE NOT NULL
+);
+
+INSERT INTO "role" ("role") VALUES ('admin');
+INSERT INTO "role" ("role") VALUES ('verified');
+
+CREATE TABLE collection (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL DEFAULT '',
+  description VARCHAR(5000),
+  userId UUID NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  Foreign Key (userId) REFERENCES "user"(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  UNIQUE(userId, name)
+);
+
+
+-- Thanks to this trigger function, each user will automatically have a default collection labeled ''.
+CREATE FUNCTION create_default_collection()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO collection (name, userId, created_at)
+    VALUES ('', NEW.id, CURRENT_TIMESTAMP);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_user_insert
+AFTER INSERT ON "user"
+FOR EACH ROW
+EXECUTE FUNCTION create_default_collection();
+
+CREATE TABLE collection_verse (
+  id BIGSERIAL PRIMARY KEY,
+  collectionId BIGINT NOT NULL,
+  verseId INTEGER NOT NULL,
+  saved_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  note TEXT,
+  Foreign Key (collectionId) REFERENCES collection(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  Foreign Key (verseId) REFERENCES verse(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  UNIQUE(collectionId, verseid)
+);
+
+CREATE table cache(
+    id BIGSERIAL PRIMARY KEY,
+    cache_key VARCHAR(255) NOT NULL UNIQUE,
+    data JSONB NOT NULL
+);
+
+

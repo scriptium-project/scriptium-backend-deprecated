@@ -16,7 +16,7 @@ export const LocalStrategy = new Local(
   ) => {
     try {
       const [user] = (
-        await db.query<User>("SELECT * FROM users WHERE username = $1", [
+        await db.query<User>('SELECT * FROM "user" WHERE username = $1', [
           username,
         ])
       ).rows;

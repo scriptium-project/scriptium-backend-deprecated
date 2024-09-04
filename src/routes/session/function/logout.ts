@@ -4,22 +4,23 @@ import {
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
-} from "../../utility/types/utility";
+} from "../../../libs/utility/types/utility";
 import type {
   NegativeResponse,
   PositiveResponse,
-} from "../../utility/types/types";
-import { LoggedOutResponse, NotLoggedResponse } from "../types/utility";
+} from "../../../libs/utility/types/types";
+import { LoggedOutResponse, NotLoggedInResponse } from "../types/utility";
 
 export const logout = async (
   request: FastifyRequest<{ Reply: PositiveResponse | NegativeResponse }>,
   response: FastifyReply
 ): Promise<void> => {
-  try {
-    if (!request.isAuthenticated())
-      return response.code(HTTP_UNAUTHORIZED_CODE).send(NotLoggedResponse);
+  if (!request.isAuthenticated())
+    return response.code(HTTP_UNAUTHORIZED_CODE).send(NotLoggedInResponse);
 
+  try {
     await request.logOut();
+
     return response.code(HTTP_ACCEPTED_CODE).send(LoggedOutResponse);
   } catch (error) {
     console.error(error);
