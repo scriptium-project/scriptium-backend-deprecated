@@ -1,4 +1,8 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type {
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction,
+} from "fastify";
 import type { ZodType } from "zod";
 import { HTTP_NOT_FOUND_CODE, NotFoundResponse } from "../types/utility";
 import type { AtLeastOneKeyGeneric } from "../types/types";
@@ -11,12 +15,12 @@ export const validateFunction = ({
 }: ValidateFunctionParameter): ((
   request: FastifyRequest,
   response: FastifyReply,
-  done: () => unknown
+  done: HookHandlerDoneFunction
 ) => unknown) => {
   return (
     request: FastifyRequest,
     response: FastifyReply,
-    done: () => unknown
+    done: HookHandlerDoneFunction
   ) => {
     if (RouteParams) {
       const routeParamsResult = RouteParams.safeParse(request.params);

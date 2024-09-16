@@ -10,6 +10,7 @@ import { fastifyPassport } from "./libs/session/passport/passport";
 import { LocalStrategy } from "./libs/session/passport/strategies/local";
 import { fastifySessionOptions } from "./libs/session/utility";
 import sessionRoute from "./routes/session/route";
+import authRoute from "./routes/auth/route";
 
 const server = fastify();
 
@@ -20,10 +21,11 @@ server.register(fastifyPassport.initialize());
 server.register(fastifyPassport.secureSession());
 fastifyPassport.use("local", LocalStrategy);
 
-server.register(verseRoute);
-server.register(pageRoute);
-server.register(rootRoute);
-server.register(sessionRoute);
+server.register(verseRoute, { prefix: "/verse" });
+server.register(pageRoute, { prefix: "/page" });
+server.register(rootRoute, { prefix: "/root" });
+server.register(authRoute, { prefix: "/auth" });
+server.register(sessionRoute, { prefix: "/session" });
 
 server.get("/ping", {
   handler: async (request: FastifyRequest, reply: FastifyReply) => {

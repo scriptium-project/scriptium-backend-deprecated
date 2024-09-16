@@ -1,25 +1,21 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply } from "fastify";
 import {
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   HTTP_NOT_FOUND_CODE,
   HTTP_OK_CODE,
-  HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
   NotFoundResponse,
 } from "../../../libs/utility/types/utility";
-import { NotLoggedInResponse } from "../types/utility";
 import type { z } from "zod";
 import type { getCollectionSchema } from "../types/getCollectionSchema";
 import db from "../../../libs/db/db";
 import type { GetCollectionType } from "../types/types";
+import type { AuthenticatedRequest } from "../types/utility";
 
 export const getCollection = async (
-  request: FastifyRequest<{ Body: z.infer<typeof getCollectionSchema> }>,
+  request: AuthenticatedRequest<{ Body: z.infer<typeof getCollectionSchema> }>,
   response: FastifyReply
-): Promise<void> => {
-  if (!request.user)
-    return response.code(HTTP_UNAUTHORIZED_CODE).send(NotLoggedInResponse);
-
+): Promise<FastifyReply> => {
   const { collectionName } = request.body ?? {};
 
   const queryString = `

@@ -1,4 +1,4 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import type {
   NegativeResponse,
@@ -10,23 +10,19 @@ import {
   HTTP_CONFLICT_CODE,
   HTTP_CREATED_CODE,
   HTTP_INTERNAL_SERVER_ERROR_CODE,
-  HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
 } from "../../../libs/utility/types/utility";
 import type { createCollectionSchema } from "../types/createCollectionSchema";
-import { NotLoggedInResponse } from "../types/utility";
 import db from "../../../libs/db/db";
+import type { AuthenticatedRequest } from "../types/utility";
 
 export const createCollection = async (
-  request: FastifyRequest<{
+  request: AuthenticatedRequest<{
     Body: z.infer<typeof createCollectionSchema>;
     Reply: PositiveResponse | NegativeResponse;
   }>,
   response: FastifyReply
-): Promise<void> => {
-  if (!request.user)
-    return response.code(HTTP_UNAUTHORIZED_CODE).send(NotLoggedInResponse);
-
+): Promise<FastifyReply> => {
   const { collectionName, description } = request.body;
 
   const queryString =

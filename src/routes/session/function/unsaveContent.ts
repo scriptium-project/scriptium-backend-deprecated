@@ -1,11 +1,10 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply } from "fastify";
 import type { z } from "zod";
 import {
   DoneResponse,
   HTTP_ACCEPTED_CODE,
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   HTTP_NOT_FOUND_CODE,
-  HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
   NotFoundResponse,
 } from "../../../libs/utility/types/utility";
@@ -14,19 +13,16 @@ import type {
   PositiveResponse,
 } from "../../../libs/utility/types/types";
 import db from "../../../libs/db/db";
-import { NotLoggedInResponse } from "../types/utility";
 import type { unsaveContentSchema } from "../types/unsaveContentSchema";
+import type { AuthenticatedRequest } from "../types/utility";
 
 export const unsaveContent = async (
-  request: FastifyRequest<{
+  request: AuthenticatedRequest<{
     Body: z.infer<typeof unsaveContentSchema>;
     Reply: PositiveResponse | NegativeResponse;
   }>,
   response: FastifyReply
-): Promise<void> => {
-  if (!request.user)
-    return response.code(HTTP_UNAUTHORIZED_CODE).send(NotLoggedInResponse);
-
+): Promise<FastifyReply> => {
   const { surahNumber, verseNumber, collectionName } = request.body;
 
   const queryString =

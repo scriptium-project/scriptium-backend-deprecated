@@ -1,0 +1,22 @@
+import { z } from "zod";
+import { CHAPTER_COUNT, versesInSurahs } from "../../verse/types/utility";
+
+export const createNoteSchema = z
+  .object({
+    surahNumber: z.number().int().min(1).max(CHAPTER_COUNT),
+    verseNumber: z.number().int().min(1),
+    note: z.string().min(1), //This input in the format of HTML5.
+  })
+  .superRefine((data, ctx) => {
+    const { surahNumber, verseNumber } = data;
+    if (
+      !(versesInSurahs[surahNumber - 1] >= verseNumber === true ? true : false)
+    )
+      ctx.addIssue({
+        path: ["verseNumber", "surahNumber"],
+        message: `Invalid verseNumber or surahNumber`,
+        code: "custom",
+      });
+
+    //TODO: Sanitization for possible attacks via HTML.
+  });

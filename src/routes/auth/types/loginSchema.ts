@@ -3,7 +3,7 @@ import {
   MAX_LENGTH_OF_EMAIL,
   MAX_LENGTH_OF_PASSWORD,
   MAX_LENGTH_OF_USERNAME,
-} from "./utility";
+} from "../../session/types/utility";
 
 export const loginSchema = z
   .object({

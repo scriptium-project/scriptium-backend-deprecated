@@ -2,10 +2,8 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
 import type { registerSchema } from "../types/registerSchema";
 import db from "../../../libs/db/db";
-import {
-  UserCreatedResponse,
-  UsernameOrEmailAlreadyInUseResponse,
-} from "../types/utility";
+import type { RowCountType } from "../../session/types/types";
+
 import * as bcrypt from "bcrypt";
 import {
   BCRYPT_SALT_NUMBER,
@@ -20,7 +18,8 @@ import type {
   NegativeResponse,
   PositiveResponse,
 } from "../../../libs/utility/types/types";
-import type { RowCountType } from "../types/types";
+import { UsernameOrEmailAlreadyInUseResponse } from "../../session/types/utility";
+import { UserCreatedResponse } from "../types/utility";
 
 export const register = async (
   request: FastifyRequest<{

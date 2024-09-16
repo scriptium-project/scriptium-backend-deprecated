@@ -4,7 +4,7 @@ import {
   MAX_LENGTH_OF_USERNAME,
   MAX_LENGTH_OF_EMAIL,
   MAX_LENGTH_OF_PASSWORD,
-} from "./utility";
+} from "../../session/types/utility";
 
 export const registerSchema = z.object({
   username: z.string().min(1).max(MAX_LENGTH_OF_USERNAME),

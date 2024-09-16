@@ -1,13 +1,19 @@
 import type {
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction,
+  RouteGenericInterface,
+} from "fastify";
+import type {
   NegativeResponse,
   PositiveResponse,
 } from "../../../libs/utility/types/types";
 import {
   HTTP_ACCEPTED_CODE,
   HTTP_CONFLICT_CODE,
-  HTTP_CREATED_CODE,
   HTTP_UNAUTHORIZED_CODE,
 } from "../../../libs/utility/types/utility";
+import type { User } from "../../../libs/session/passport/type";
 
 export const MAX_LENGTH_OF_USERNAME = 24;
 export const MAX_LENGTH_OF_NAME = 30;
@@ -18,21 +24,6 @@ export const MAX_LENGTH_OF_PASSWORD = 50;
 export const UsernameOrEmailAlreadyInUseResponse: NegativeResponse = {
   err: "Username or Email are already in use!",
   code: HTTP_UNAUTHORIZED_CODE,
-};
-
-export const BadCredentialsResponse: NegativeResponse = {
-  err: "Bad Credentials!",
-  code: HTTP_UNAUTHORIZED_CODE,
-};
-
-export const LoggedInResponse: PositiveResponse = {
-  msg: "Successfully logged in!",
-  code: HTTP_ACCEPTED_CODE,
-};
-
-export const UserCreatedResponse: PositiveResponse = {
-  msg: "User successfully created!",
-  code: HTTP_CREATED_CODE,
 };
 
 export const LoggedOutResponse: PositiveResponse = {
@@ -63,3 +54,20 @@ export const AvailableRoles = {
 
 export const MAX_LENGTH_OF_COLLECTION_NAME = 100;
 export const MAX_LENGTH_OF_COLLECTION_DESCRIPTION = 5000;
+
+export interface AuthenticatedRequest<
+  RouteGeneric extends RouteGenericInterface = RouteGenericInterface
+> extends FastifyRequest<RouteGeneric> {
+  user: User; // user is definitely defined.
+}
+
+export function checkAuthentication(
+  request: FastifyRequest,
+  response: FastifyReply,
+  done: HookHandlerDoneFunction
+): void | unknown {
+  if (!request.user)
+    return response.code(HTTP_UNAUTHORIZED_CODE).send(NotLoggedInResponse);
+
+  done();
+}

@@ -34,7 +34,7 @@ export const HTTP_GATEWAY_TIMEOUT_CODE = 504;
 
 // Constants
 
-export const MAX_PAGE_IN_QURAN = 604;
+export const MAX_PAGE_COUNT = 604;
 
 export const BCRYPT_SALT_NUMBER = +process.env.BCRYPT_SALT_NUMBER;
 

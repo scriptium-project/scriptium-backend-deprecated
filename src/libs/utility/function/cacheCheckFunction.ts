@@ -1,11 +1,15 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type {
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction,
+} from "fastify";
 import db from "../../db/db";
 import { HTTP_OK_CODE } from "../types/utility";
 
 export const cacheCheckFunction = (
   request: FastifyRequest,
   response: FastifyReply,
-  done: (err?: Error) => unknown
+  done: HookHandlerDoneFunction
 ): void => {
   db.query("SELECT data FROM cache WHERE cache_key = $1", [request.url])
     .then((result) => {

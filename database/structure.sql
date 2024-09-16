@@ -22,7 +22,7 @@ CREATE TABLE verse(
     pageNumber SMALLINT NOT NULL,
     juzNumber SMALLINT NOT NULL,
     surahId SMALLINT NOT NULL,
-    Foreign Key (surahId) REFERENCES surahs(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    Foreign Key (surahId) REFERENCES surahs(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     UNIQUE(verseNumber, surahId)
 );
 
@@ -35,8 +35,8 @@ CREATE TABLE word(
     textNoVowel VARCHAR(22) NOT NULL,
     verseid INTEGER NOT NULL,
     rootId INTEGER,
-    Foreign Key (rootId) REFERENCES roots(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    Foreign Key (verseId) REFERENCES verses(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    Foreign Key (rootId) REFERENCES roots(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (verseId) REFERENCES verses(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     UNIQUE(sortNumber, verseId)
 );
 
@@ -56,7 +56,7 @@ CREATE TABLE translator(
     name VARCHAR(50) NOT NULL,
     url VARCHAR(2000),
     langCode VARCHAR(2) NOT NULL,
-    Foreign Key (langCode) REFERENCES languages(langCode) ON DELETE CASCADE ON UPDATE CASCADE
+    Foreign Key (langCode) REFERENCES languages(langCode) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE translation(
@@ -64,7 +64,7 @@ CREATE TABLE translation(
     name VARCHAR(100) NOT NULL,
     langCode VARCHAR(2),
     prodYear DATE,
-    Foreign Key (langCode) REFERENCES languages(langCode) ON DELETE CASCADE ON UPDATE CASCADE
+    Foreign Key (langCode) REFERENCES languages(langCode) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 
@@ -83,7 +83,7 @@ CREATE TABLE transliteration(
     langCode VARCHAR(2) NOT NULL,
     transliteration VARCHAR(1500) NOT NULL,
     verseid INTEGER NOT NULL,
-    Foreign Key (verseId) REFERENCES verses(id) ON DELETE CASCADE ON UPDATE CASCADE
+    Foreign Key (verseId) REFERENCES verses(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE wordMeaning(
@@ -91,8 +91,8 @@ CREATE TABLE wordMeaning(
     meaning VARCHAR(100) NOT NULL,
     wordId SMALLINT NOT NULL,
     langCode VARCHAR(2) NOT NULL,
-    Foreign Key (wordId) REFERENCES words(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    Foreign Key (langCode) REFERENCES languages(langCode) ON DELETE CASCADE ON UPDATE CASCADE,
+    Foreign Key (wordId) REFERENCES words(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (langCode) REFERENCES languages(langCode) ON DELETE RESTRICT ON UPDATE CASCADE,
     UNIQUE(wordId,meaning,langCode)
 )
 
@@ -103,7 +103,7 @@ CREATE TABLE translationText(
     translationId SMALLINT NOT NULL,
     verseid INTEGER NOT NULL,
     Foreign Key (translationId) REFERENCES translation(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    Foreign Key (verseId) REFERENCES verses(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    Foreign Key (verseId) REFERENCES verses(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     UNIQUE(translation,translationId, verseId)
 )
 
@@ -169,9 +169,9 @@ INSERT INTO "role" ("role") VALUES ('admin');
 INSERT INTO "role" ("role") VALUES ('verified');
 
 CREATE TABLE collection (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL DEFAULT '',
-  description VARCHAR(5000),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(500) NOT NULL DEFAULT '',
+  description VARCHAR(1000),
   userId UUID NOT NULL,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   Foreign Key (userId) REFERENCES "user"(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -195,13 +195,13 @@ FOR EACH ROW
 EXECUTE FUNCTION create_default_collection();
 
 CREATE TABLE collection_verse (
-  id BIGSERIAL PRIMARY KEY,
-  collectionId BIGINT NOT NULL,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  collectionId UUID NOT NULL,
   verseId INTEGER NOT NULL,
   saved_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-  note TEXT,
+  note VARCHAR(1000),
   Foreign Key (collectionId) REFERENCES collection(id) ON DELETE CASCADE ON UPDATE CASCADE,
-  Foreign Key (verseId) REFERENCES verse(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  Foreign Key (verseId) REFERENCES verse(id) ON DELETE RESTRICT ON UPDATE CASCADE,
   UNIQUE(collectionId, verseid)
 );
 
@@ -212,3 +212,29 @@ CREATE table cache(
 );
 
 
+CREATE table notes(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    userId UUID NOT NULL,
+    text VARCHAR(5000),
+    verseId INTEGER NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ,
+    Foreign Key (verseId) REFERENCES verse(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (userId) REFERENCES "user"(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE FUNCTION check_user_note_limit()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (SELECT COUNT(*) FROM notes 
+        WHERE userId = NEW.userId 
+          AND verseId = NEW.verseId) >= 5 THEN --Since a user it is possible to create 5 notes per verse.
+        RETURN NULL;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_user_note_limit_trigger
+BEFORE INSERT ON notes
+FOR EACH ROW EXECUTE FUNCTION check_user_note_limit();

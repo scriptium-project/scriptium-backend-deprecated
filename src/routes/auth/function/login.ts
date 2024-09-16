@@ -10,11 +10,12 @@ import {
   HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
 } from "../../../libs/utility/types/utility";
-import { BadCredentialsResponse, LoggedInResponse } from "../types/utility";
+
 import type {
   NegativeResponse,
   PositiveResponse,
 } from "../../../libs/utility/types/types";
+import { BadCredentialsResponse, LoggedInResponse } from "../types/utility";
 
 export const login = async (
   request: FastifyRequest<{
