@@ -3,9 +3,13 @@ import type {
   FastifyRequest,
   HookHandlerDoneFunction,
 } from "fastify";
-import type { ZodType } from "zod";
-import { HTTP_NOT_FOUND_CODE, NotFoundResponse } from "../types/utility";
+import type { SafeParseReturnType, ZodIssue, ZodType } from "zod";
 import type { AtLeastOneKeyGeneric } from "../types/types";
+const HTTP_BAD_REQUEST_CODE = 400;
+const BadRequestResponse = {
+  err: "Validation Failed.",
+  code: HTTP_BAD_REQUEST_CODE,
+};
 
 export const validateFunction = ({
   RouteParams,
@@ -16,66 +20,55 @@ export const validateFunction = ({
   request: FastifyRequest,
   response: FastifyReply,
   done: HookHandlerDoneFunction
-) => unknown) => {
+) => FastifyReply | void) => {
   return (
     request: FastifyRequest,
     response: FastifyReply,
     done: HookHandlerDoneFunction
   ) => {
-    if (RouteParams) {
-      const routeParamsResult = RouteParams.safeParse(request.params);
-
-      if (!routeParamsResult.success)
-        return response.code(HTTP_NOT_FOUND_CODE).send({
-          ...NotFoundResponse,
-          messages: routeParamsResult.error.errors.map((e) => ({
+    const handleValidation = (
+      result: SafeParseReturnType<unknown, unknown>
+    ): FastifyReply | null => {
+      if (!result.success) {
+        return response.code(HTTP_BAD_REQUEST_CODE).send({
+          ...BadRequestResponse,
+          messages: result.error.errors.map((e: ZodIssue) => ({
             path: e.path,
             msg: e.message,
           })),
         });
+      }
+      return null;
+    };
+
+    if (RouteParams) {
+      const routeParamsResult = RouteParams.safeParse(request.params);
+      const routeError = handleValidation(routeParamsResult);
+      if (routeError) return routeError;
       request.params = routeParamsResult.data;
     }
 
     if (BodyParams) {
       const bodyParamsResult = BodyParams.safeParse(request.body);
-
-      if (!bodyParamsResult.success)
-        return response.code(HTTP_NOT_FOUND_CODE).send({
-          ...NotFoundResponse,
-          messages: bodyParamsResult.error.errors.map((e) => ({
-            path: e.path,
-            msg: e.message,
-          })),
-        });
+      const bodyError = handleValidation(bodyParamsResult);
+      if (bodyError) return bodyError;
       request.body = bodyParamsResult.data;
     }
 
     if (QueryStringParams) {
       const queryStringParams = QueryStringParams.safeParse(request.query);
-
-      if (!queryStringParams.success)
-        return response.code(HTTP_NOT_FOUND_CODE).send({
-          ...NotFoundResponse,
-          messages: queryStringParams.error.errors.map((e) => ({
-            path: e.path,
-            msg: e.message,
-          })),
-        });
+      const queryError = handleValidation(queryStringParams);
+      if (queryError) return queryError;
       request.query = queryStringParams.data;
     }
+
     if (Headers) {
       const headersResult = Headers.safeParse(request.headers);
-
-      if (!headersResult.success)
-        return response.code(HTTP_NOT_FOUND_CODE).send({
-          ...NotFoundResponse,
-          messages: headersResult.error.errors.map((e) => ({
-            path: e.path,
-            msg: e.message,
-          })),
-        });
+      const headersError = handleValidation(headersResult);
+      if (headersError) return headersError;
       request.headers = headersResult.data;
     }
+
     done();
   };
 };

@@ -11,8 +11,14 @@ import { LocalStrategy } from "./libs/session/passport/strategies/local";
 import { fastifySessionOptions } from "./libs/session/utility";
 import sessionRoute from "./routes/session/route";
 import authRoute from "./routes/auth/route";
+import fastifyCors from "@fastify/cors";
 
 const server = fastify();
+
+server.register(fastifyCors, {
+  origin: "http://localhost:3000",
+  credentials: true,
+});
 
 server.register(fastifyCookie);
 server.register(fastifySession, fastifySessionOptions);
@@ -28,8 +34,8 @@ server.register(authRoute, { prefix: "/auth" });
 server.register(sessionRoute, { prefix: "/session" });
 
 server.get("/ping", {
-  handler: async (request: FastifyRequest, reply: FastifyReply) => {
-    return reply.code(HTTP_ACCEPTED_CODE).send({
+  handler: async (request: FastifyRequest, response: FastifyReply) => {
+    return response.code(HTTP_ACCEPTED_CODE).send({
       msg: "done",
       ip: request.ip,
     });
@@ -38,12 +44,12 @@ server.get("/ping", {
 
 //This function is on the purpose of testing!
 server.get("/pong", {
-  handler: async (request: FastifyRequest, reply: FastifyReply) => {
-    return reply.code(HTTP_ACCEPTED_CODE).send({
+  handler: async (request: FastifyRequest, response: FastifyReply) => {
+    return response.code(HTTP_ACCEPTED_CODE).send({
       msg: "done",
       session: request.session.sessionId,
       user: request.user,
-      role: request.user?.role_id,
+      username: request.user?.username,
     });
   },
 });

@@ -10,26 +10,21 @@ import {
   HTTP_UNAUTHORIZED_CODE,
   InternalServerErrorResponse,
 } from "../../../libs/utility/types/utility";
-
-import type {
-  NegativeResponse,
-  PositiveResponse,
-} from "../../../libs/utility/types/types";
 import { BadCredentialsResponse, LoggedInResponse } from "../types/utility";
 
 export const login = async (
   request: FastifyRequest<{
     Body: z.infer<typeof loginSchema>;
-    Reply: PositiveResponse | NegativeResponse;
   }>,
   response: FastifyReply
-): Promise<void> => {
-  const { username, email, password } = request.body;
+): Promise<FastifyReply> => {
+  const { identifier, password } = request.body;
 
-  const queryString = 'SELECT * FROM "user" WHERE username = $1 OR email = $2';
-
+  const queryString = `SELECT * FROM "user" WHERE username = $1 OR email = $1`;
   try {
-    const [user] = (await db.query<User>(queryString, [username, email])).rows;
+    const {
+      rows: [user],
+    } = await db.query<User>(queryString, [identifier]);
 
     if (!user)
       return response.code(HTTP_UNAUTHORIZED_CODE).send(BadCredentialsResponse);

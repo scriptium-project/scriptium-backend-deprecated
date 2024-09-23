@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { langCodeRefineFunction } from "../../../libs/utility/types/utility";
-import { CHAPTER_COUNT, versesInSurahs } from "./utility";
+import { CHAPTER_COUNT, VERSE_COUNT_FOR_EACH_CHAPTER } from "./utility";
 
 export const getVerseSchema = z
   .object({
@@ -10,14 +10,14 @@ export const getVerseSchema = z
       .refine((val: number) => !isNaN(val), {
         message: "verseNumber must be a valid number",
       }),
-    surahNumber: z
+    chapterNumber: z
       .string()
       .transform((val: string) => parseInt(val))
       .refine((val: number) => !isNaN(val), {
-        message: "surahNumber must be a valid number",
+        message: "chapterNumber must be a valid number",
       })
       .refine((val: number) => val > 0 && val <= CHAPTER_COUNT, {
-        message: "surahNumber must be between 1 and 114",
+        message: "chapterNumber must be between 1 and 114",
       }),
     langCode: z.string().min(1).optional().refine(
       langCodeRefineFunction,
@@ -28,13 +28,19 @@ export const getVerseSchema = z
     ),
   })
   .superRefine((data, ctx) => {
-    const { surahNumber, verseNumber } = data;
+    const { chapterNumber, verseNumber } = data;
+    let maxVerseNumber: number;
+
     if (
-      !(versesInSurahs[surahNumber - 1] >= verseNumber === true ? true : false)
+      (maxVerseNumber = VERSE_COUNT_FOR_EACH_CHAPTER[chapterNumber - 1]) <
+      verseNumber
     )
       ctx.addIssue({
+        code: "too_big",
+        maximum: maxVerseNumber,
+        inclusive: true,
+        type: "string",
+        message: `verseNumber is too big; maximum upper limit is ${maxVerseNumber}`,
         path: ["verseNumber"],
-        message: `Invalid verseNumber or surahNumber`,
-        code: "custom",
       });
   });

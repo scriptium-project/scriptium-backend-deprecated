@@ -1,13 +1,13 @@
 export type getVerseReplySchema = {
   data: {
-    surah_number: number;
-    surah_name_ar: string;
+    chapter_number: number;
+    chapter_number_ar: string;
     verse_number: number;
     text: string;
     text_simplified: string;
     text_no_vowel: string;
     transliterations: Transliterations;
-    meaning: SurahMeanings;
+    meaning: ChapterMeaning;
     translation: Translations;
     words: Word[];
   };
@@ -15,10 +15,10 @@ export type getVerseReplySchema = {
 //#region types
 type Transliterations = { [langCode: string]: string };
 
-type SurahMeanings = {
+type ChapterMeaning = {
   [langCode: string]: {
-    surahName: string;
-    surahNameMeaning: string;
+    chapterNumber: number;
+    chapterNameMeaning: string;
   };
 };
 

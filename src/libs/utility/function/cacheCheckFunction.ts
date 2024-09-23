@@ -11,7 +11,7 @@ export const cacheCheckFunction = (
   response: FastifyReply,
   done: HookHandlerDoneFunction
 ): void => {
-  db.query("SELECT data FROM cache WHERE cache_key = $1", [request.url])
+  db.query("SELECT data FROM cache WHERE key = $1", [request.url])
     .then((result) => {
       const [data] = result.rows;
 

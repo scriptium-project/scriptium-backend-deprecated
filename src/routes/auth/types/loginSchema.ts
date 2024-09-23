@@ -1,22 +1,25 @@
 import { z } from "zod";
 import {
-  MAX_LENGTH_OF_EMAIL,
-  MAX_LENGTH_OF_PASSWORD,
-  MAX_LENGTH_OF_USERNAME,
+  MAX_LENGTH_FOR_EMAIL,
+  MAX_LENGTH_FOR_PASSWORD,
+  MAX_LENGTH_FOR_USERNAME,
 } from "../../session/types/utility";
 
-export const loginSchema = z
-  .object({
-    username: z.string().min(1).max(MAX_LENGTH_OF_USERNAME).optional(),
-    email: z.string().min(1).max(MAX_LENGTH_OF_EMAIL).optional(),
-    password: z.string().min(1).max(MAX_LENGTH_OF_PASSWORD),
-  })
-  .superRefine((data, ctx) => {
-    const { username, email } = data;
-    if (!(username || email))
-      ctx.addIssue({
-        path: ["username", "email"],
-        code: "custom",
-        message: "Username and empty cannot be empty..",
-      });
-  });
+export const loginSchema = z.object({
+  identifier: z
+    .string()
+    .min(1)
+    .max(Math.max(MAX_LENGTH_FOR_USERNAME, MAX_LENGTH_FOR_EMAIL))
+    .refine(
+      (identifier) => {
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+        const isUsername = /^[a-zA-Z0-9]+$/.test(identifier);
+        return isEmail || isUsername;
+      },
+      {
+        message:
+          "Identifier must be a valid email or an alphanumeric username.",
+      }
+    ),
+  password: z.string().min(1).max(MAX_LENGTH_FOR_PASSWORD),
+});

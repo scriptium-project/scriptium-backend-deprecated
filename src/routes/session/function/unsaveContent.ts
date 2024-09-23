@@ -1,4 +1,4 @@
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
 import {
   DoneResponse,
@@ -8,41 +8,38 @@ import {
   InternalServerErrorResponse,
   NotFoundResponse,
 } from "../../../libs/utility/types/utility";
-import type {
-  NegativeResponse,
-  PositiveResponse,
-} from "../../../libs/utility/types/types";
+
 import db from "../../../libs/db/db";
-import type { unsaveContentSchema } from "../types/unsaveContentSchema";
-import type { AuthenticatedRequest } from "../types/utility";
+import type { deleteContentSchema } from "../types/deleteContentSchema";
+import type { User } from "../../../libs/session/passport/type";
 
 export const unsaveContent = async (
-  request: AuthenticatedRequest<{
-    Body: z.infer<typeof unsaveContentSchema>;
-    Reply: PositiveResponse | NegativeResponse;
+  request: FastifyRequest<{
+    Body: z.infer<typeof deleteContentSchema>;
   }>,
   response: FastifyReply
 ): Promise<FastifyReply> => {
-  const { surahNumber, verseNumber, collectionName } = request.body;
+  const { chapterNumber, verseNumber, collectionName } = request.body;
+
+  const user = request.user as User;
 
   const queryString =
-    "DELETE FROM collection_verse WHERE verseid = (SELECT id FROM verse WHERE surahId = $1 AND verseNumber = $2) AND collectionId = (SELECT id FROM collection WHERE userId = $3 AND name = $4)";
+    "DELETE FROM collection_verse WHERE verseid = (SELECT id FROM verse WHERE chapterId = $1 AND verseNumber = $2) AND collectionId = (SELECT id FROM collection WHERE userId = $3 AND name = $4)";
 
   try {
-    const rowCount = (
-      await db.query(queryString, [
-        surahNumber,
-        verseNumber,
-        request.user.id,
-        collectionName,
-      ])
-    ).rowCount;
-
-    if (!rowCount)
-      return response.code(HTTP_NOT_FOUND_CODE).send(NotFoundResponse);
+    const { rowCount } = await db.query(queryString, [
+      chapterNumber,
+      verseNumber,
+      user.id,
+      collectionName,
+    ]);
 
     //TODO: Remove this.
-    if (rowCount > 1) throw new Error("Something went unexpectedly wrong?");
+    if (rowCount ?? 0 > 1)
+      throw new Error("Something went unexpectedly wrong?");
+
+    if ((rowCount ?? 0) === 0)
+      return response.code(HTTP_NOT_FOUND_CODE).send(NotFoundResponse);
 
     return response.code(HTTP_ACCEPTED_CODE).send(DoneResponse);
   } catch (error) {

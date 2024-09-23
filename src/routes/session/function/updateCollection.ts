@@ -1,9 +1,5 @@
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
-import type {
-  NegativeResponse,
-  PositiveResponse,
-} from "../../../libs/utility/types/types";
 import {
   DoneResponse,
   HTTP_INTERNAL_SERVER_ERROR_CODE,
@@ -12,38 +8,38 @@ import {
   InternalServerErrorResponse,
   NotFoundResponse,
 } from "../../../libs/utility/types/utility";
-import type { updateCollectionSchema } from "../types/editCollectionSchema";
+import type { updateCollectionSchema } from "../types/updateCollectionSchema";
 import db from "../../../libs/db/db";
-import type { AuthenticatedRequest } from "../types/utility";
+import type { User } from "../../../libs/session/passport/type";
 
 export const updateCollection = async (
-  request: AuthenticatedRequest<{
+  request: FastifyRequest<{
     Body: z.infer<typeof updateCollectionSchema>;
-    Reply: PositiveResponse | NegativeResponse;
   }>,
   response: FastifyReply
 ): Promise<FastifyReply> => {
   const { collectionNewName, collectionName, collectionNewDescription } =
     request.body;
 
+  const user = request.user as User;
+
   const queryString =
     "UPDATE collection SET name = $1, description = $2 WHERE userId = $3 AND name = $4";
 
   try {
-    const rowCount = (
-      await db.query(queryString, [
-        collectionNewName,
-        collectionNewDescription,
-        request.user.id,
-        collectionName,
-      ])
-    ).rowCount;
-
-    if (!rowCount)
-      return response.code(HTTP_NOT_FOUND_CODE).send(NotFoundResponse);
+    const { rowCount } = await db.query(queryString, [
+      collectionNewName ?? collectionName,
+      collectionNewDescription,
+      user.id,
+      collectionName,
+    ]);
 
     //TODO: Remove this.
-    if (rowCount > 1) throw new Error("Something went unexpectedly wrong?");
+    if (rowCount ?? 0 > 1)
+      throw new Error("Something went unexpectedly wrong?");
+
+    if ((rowCount ?? 0) === 0)
+      return response.code(HTTP_NOT_FOUND_CODE).send(NotFoundResponse);
 
     return response.code(HTTP_OK_CODE).send(DoneResponse);
   } catch (error) {

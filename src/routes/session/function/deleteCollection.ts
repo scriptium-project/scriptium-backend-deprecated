@@ -1,9 +1,6 @@
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
-import type {
-  NegativeResponse,
-  PositiveResponse,
-} from "../../../libs/utility/types/types";
+
 import {
   DoneResponse,
   HTTP_INTERNAL_SERVER_ERROR_CODE,
@@ -14,25 +11,24 @@ import {
 } from "../../../libs/utility/types/utility";
 import type { createCollectionSchema } from "../types/createCollectionSchema";
 import db from "../../../libs/db/db";
-import type { AuthenticatedRequest } from "../types/utility";
+import type { User } from "../../../libs/session/passport/type";
 
 export const deleteCollection = async (
-  request: AuthenticatedRequest<{
+  request: FastifyRequest<{
     Body: z.infer<typeof createCollectionSchema>;
-    Reply: PositiveResponse | NegativeResponse;
   }>,
   response: FastifyReply
 ): Promise<FastifyReply> => {
   const { collectionName } = request.body;
 
+  const user = request.user as User;
+
   const queryString = "DELETE FROM collection WHERE userId = $1 AND name = $2";
 
   try {
-    const rowCount = (
-      await db.query(queryString, [request.user.id, collectionName])
-    ).rowCount;
+    const { rowCount } = await db.query(queryString, [user.id, collectionName]);
 
-    if (!rowCount)
+    if ((rowCount ?? 0) === 0)
       return response.code(HTTP_NOT_FOUND_CODE).send(NotFoundResponse);
 
     return response.code(HTTP_OK_CODE).send(DoneResponse);

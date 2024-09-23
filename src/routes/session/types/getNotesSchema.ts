@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { CHAPTER_COUNT, versesInSurahs } from "../../verse/types/utility";
+import {
+  CHAPTER_COUNT,
+  VERSE_COUNT_FOR_EACH_CHAPTER,
+} from "../../verse/types/utility";
 
 export const getNotesSchema = z
   .object({
@@ -10,27 +13,33 @@ export const getNotesSchema = z
         message: "verseNumber must be a valid number",
       })
       .optional(),
-    surahNumber: z
+    chapterNumber: z
       .string()
       .transform((val: string) => parseInt(val))
       .refine((val: number) => !isNaN(val), {
-        message: "surahNumber must be a valid number",
+        message: "chapterNumber must be a valid number",
       })
       .refine((val: number) => val > 0 && val <= CHAPTER_COUNT, {
-        message: "surahNumber must be between 1 and 114",
+        message: "chapterNumber must be between 1 and 114",
       })
       .optional(),
   })
   .superRefine((data, ctx) => {
-    const { surahNumber, verseNumber } = data;
+    const { chapterNumber, verseNumber } = data;
+    let maxVerseNumber: number;
+
     if (
-      surahNumber &&
+      chapterNumber &&
       verseNumber &&
-      !(versesInSurahs[surahNumber - 1] >= verseNumber === true ? true : false)
+      (maxVerseNumber = VERSE_COUNT_FOR_EACH_CHAPTER[chapterNumber - 1]) <
+        verseNumber
     )
       ctx.addIssue({
-        path: ["verseNumber", "surahNumber"],
-        message: `Invalid verseNumber or surahNumber`,
-        code: "custom",
+        code: "too_big",
+        maximum: maxVerseNumber,
+        inclusive: true,
+        type: "string",
+        message: `verseNumber is too big; maximum upper limit is ${maxVerseNumber}`,
+        path: ["verseNumber"],
       });
   });

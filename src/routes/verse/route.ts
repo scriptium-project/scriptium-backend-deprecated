@@ -10,7 +10,7 @@ export default function verseRoute(
   done: HookHandlerDoneFunction
 ): void {
   server.decorateRequest("cacheKey", null);
-  server.get("/:surahNumber/:verseNumber/:langCode?", {
+  server.get("/:chapterNumber/:verseNumber/:langCode?", {
     preValidation: validateFunction({ RouteParams: getVerseSchema }),
     preHandler: cacheCheckFunction,
     handler: getVerse,

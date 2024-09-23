@@ -1,4 +1,4 @@
-import { FastifyRequest, RouteGenericInterface } from "fastify";
+import type { User } from "../../session/passport/type";
 
 /**
  *  A comprehensive type for regular negative responses.
@@ -26,3 +26,17 @@ export type PositiveResponse = {
 
 export type AtLeastOneKeyGeneric<T> = Partial<T> &
   { [K in keyof T]: Pick<T, K> }[keyof T];
+
+/**
+ *
+ * @param T is a key of User type.
+ * @returns Returns the object filled with specified property(s) of User type.
+ */
+export type UserPick<T extends keyof User> = Pick<User, T>;
+
+/**
+ *
+ * @param T is a key of User type.
+ * @returns Returns the type of specified property of User type.
+ */
+export type UserProperty<T extends keyof User> = User[T];

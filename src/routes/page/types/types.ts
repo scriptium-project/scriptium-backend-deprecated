@@ -5,7 +5,7 @@ export type getPageResponseSchema = {
 
 //#region types
 type Verse = {
-  surahNumber: number;
+  chapterNumber: number;
   verseNumber: number;
   text: string;
   textSimplified: string;

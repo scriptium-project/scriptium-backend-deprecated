@@ -6,7 +6,7 @@ export type getRootResponseSchema = {
 };
 //#region types
 type Verses = {
-  surahNumber: number;
+  chapterNumber: number;
   verseNumber: number;
   verseText: string;
   transliteration: string;

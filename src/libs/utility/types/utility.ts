@@ -69,6 +69,16 @@ export const AlreadyCreatedResponse: NegativeResponse = {
   code: HTTP_CONFLICT_CODE,
 };
 
+export const AlreadyAcceptedResponse: NegativeResponse = {
+  err: "The request is already accepted!",
+  code: HTTP_BAD_REQUEST_CODE,
+};
+
+export const InformationConflictedResponse: NegativeResponse = {
+  err: "Some information has conflicted!",
+  code: HTTP_CONFLICT_CODE,
+};
+
 export const CreatedResponse: PositiveResponse = {
   msg: "Created!",
   code: HTTP_CREATED_CODE,
@@ -81,6 +91,11 @@ export const DoneResponse: PositiveResponse = {
 
 export const FailedResponse: NegativeResponse = {
   err: "Failed!",
+  code: HTTP_BAD_REQUEST_CODE,
+};
+
+export const BadRequestResponse: NegativeResponse = {
+  err: "Bad Request!",
   code: HTTP_BAD_REQUEST_CODE,
 };
 

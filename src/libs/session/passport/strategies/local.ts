@@ -3,6 +3,7 @@ import { Strategy as Local } from "passport-local";
 import db from "../../../db/db";
 import type { User } from "../type";
 import bcrypt from "bcrypt";
+import { SelectFromUserExceptPasswordQuery } from "../passport";
 
 export const LocalStrategy = new Local(
   async (
@@ -16,9 +17,10 @@ export const LocalStrategy = new Local(
   ) => {
     try {
       const [user] = (
-        await db.query<User>('SELECT * FROM "user" WHERE username = $1', [
-          username,
-        ])
+        await db.query<User>(
+          `${SelectFromUserExceptPasswordQuery} WHERE id = $1 WHERE username = $1`,
+          [username]
+        )
       ).rows;
       if (!user)
         return done(null, false, { message: "Invalid username or password" });

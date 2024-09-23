@@ -1,9 +1,5 @@
-import type { FastifyReply } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
-import type {
-  NegativeResponse,
-  PositiveResponse,
-} from "../../../libs/utility/types/types";
 import {
   AlreadyCreatedResponse,
   CreatedResponse,
@@ -14,12 +10,11 @@ import {
 } from "../../../libs/utility/types/utility";
 import type { createCollectionSchema } from "../types/createCollectionSchema";
 import db from "../../../libs/db/db";
-import type { AuthenticatedRequest } from "../types/utility";
+import type { User } from "../../../libs/session/passport/type";
 
 export const createCollection = async (
-  request: AuthenticatedRequest<{
+  request: FastifyRequest<{
     Body: z.infer<typeof createCollectionSchema>;
-    Reply: PositiveResponse | NegativeResponse;
   }>,
   response: FastifyReply
 ): Promise<FastifyReply> => {
@@ -29,15 +24,15 @@ export const createCollection = async (
     "INSERT INTO collection (name, description, userId) VALUES ($1,$2,$3) ON CONFLICT (userId, name) DO NOTHING";
 
   try {
-    const rowCount = (
-      await db.query(queryString, [
-        collectionName,
-        description,
-        request.user.id,
-      ])
-    ).rowCount;
+    const user = request.user as User;
 
-    if (!rowCount)
+    const { rowCount } = await db.query(queryString, [
+      collectionName,
+      description,
+      user.id,
+    ]);
+
+    if ((rowCount ?? 0) === 0)
       return response.code(HTTP_CONFLICT_CODE).send(AlreadyCreatedResponse);
 
     return response.code(HTTP_CREATED_CODE).send(CreatedResponse);

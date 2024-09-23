@@ -77,7 +77,15 @@ export const fastifySessionOptions: FastifyRegisterOptions<FastifySessionOptions
     cookie: {
       maxAge: MAX_AGE,
       secure: false,
+      httpOnly: true,
     },
     store: sessionStorage,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    cookieName: "s",
   };
+
+export const AvailableRoles = {
+  user: { id: null },
+  admin: { id: 1 },
+  verified: { id: 2 },
+} as const;

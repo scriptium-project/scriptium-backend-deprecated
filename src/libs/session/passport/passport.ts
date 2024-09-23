@@ -3,29 +3,27 @@ import type { SerializedUser } from "./type";
 import type { User } from "./type";
 import db from "../../db/db";
 
+export const SelectFromUserExceptPasswordQuery = `SELECT id, username, name, surname, gender, biography, email, email_verified, created_at, last_active, is_frozen, is_private, role_id FROM "user"`;
+
 export const fastifyPassport = new Authenticator();
 
-/*
- * The reason I create this type:
- * It is unnecessary to access the password as it can be vulnerable. At least for now...
- * We will also re-evaluate the password privately in cases where the password is required (username change, password change, etc.).
- */
-type UserWithoutPassword = Omit<User, "password">;
-
-fastifyPassport.registerUserSerializer<UserWithoutPassword, SerializedUser>(
+fastifyPassport.registerUserSerializer<User, SerializedUser>(
   async (user, _request) => user.id
 );
 
-fastifyPassport.registerUserDeserializer<SerializedUser, UserWithoutPassword>(
+fastifyPassport.registerUserDeserializer<SerializedUser, User>(
   async (id, request) => {
     try {
-      const { rows } = await db.query<User>(
-        'SELECT * FROM "user" WHERE id = $1',
+      const {
+        rows: [user],
+        rowCount,
+      } = await db.query<User>(
+        `${SelectFromUserExceptPasswordQuery} WHERE id = $1`,
         [id]
       );
-      if (rows.length === 0) request.session.destroy();
+      if (!rowCount) request.session.destroy();
 
-      return { ...rows[0], password: undefined };
+      return user;
     } catch (error) {
       console.error("Error deserializing user:", error);
       throw error;
