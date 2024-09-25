@@ -1,7 +1,3 @@
-SELECT schema_name
-FROM information_schema.schemata
-WHERE schema_name = 'writings';
-
 CREATE TABLE chapter(  
     id SMALLSERIAL NOT NULL PRIMARY KEY,
     chapterName TEXT NOT NULL UNIQUE,
@@ -143,7 +139,7 @@ CREATE TABLE session (
 
 CREATE TABLE "user"(
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username VARCHAR(24) NOT NULL,
+  username VARCHAR(24) NOT NULL UNIQUE,
   name VARCHAR(30) NOT NULL,
   surname VARCHAR(30) NOT NULL,
   gender CHAR(1),
@@ -156,8 +152,8 @@ CREATE TABLE "user"(
   is_frozen TIMESTAMPTZ DEFAULT NULL,
   is_private TIMESTAMPTZ,
   role_id SMALLINT,
-  preferred_languageId VARCHAR(2) NOT NULL DEFAULT 'en',
-  Foreign Key (role_id) REFERENCES "role"(id) ON DELETE SET NULL ON UPDATE CASCADE
+  preferred_languageId SMALLINT DEFAULT 1,
+  Foreign Key (role_id) REFERENCES "role"(id) ON DELETE SET NULL ON UPDATE CASCADE,
   Foreign Key (preferred_languageId) REFERENCES "language"(Id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 

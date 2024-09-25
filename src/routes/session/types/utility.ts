@@ -18,9 +18,9 @@ import DOMPurify from "dompurify";
 import type { z } from "zod";
 import { JSDOM } from "jsdom";
 
-export const MIN_LETTERS_IN_USERNAME = 3;
+export const MIN_LETTERS_OR_NUMBERS_IN_USERNAME = 3;
 export const MIN_LENGTH_FOR_USERNAME = 3;
-export const MAX_LENGTH_FOR_USERNAME = 24;
+export const MAX_LENGTH_FOR_USERNAME = 18;
 
 export const MIN_LENGTH_FOR_NAME = 3;
 export const MAX_LENGTH_FOR_NAME = 30;
@@ -36,7 +36,7 @@ export const MAX_LENGTH_FOR_EMAIL = 255;
 export const MAX_LENGTH_FOR_COLLECTION_NAME = 100;
 export const MAX_LENGTH_FOR_COLLECTION_DESCRIPTION = 250;
 
-export const MAX_LENGTH_FOR_COMMENT = 2500;
+export const MAX_LENGTH_FOR_COMMENT = 1500;
 
 export const MAX_LENGTH_FOR_BIOGRAPHY = 200;
 

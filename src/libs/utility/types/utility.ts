@@ -100,7 +100,7 @@ export const BadRequestResponse: NegativeResponse = {
 };
 
 export const AvailableLangCodes = {
-  en: "English",
-  tr: "Turkish",
-  de: "German",
+  en: 1,
+  tr: 2,
+  de: 3,
 } as const;

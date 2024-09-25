@@ -5,6 +5,7 @@ import db from "../../../libs/db/db";
 import * as bcrypt from "bcrypt";
 import { UserCreatedResponse } from "../types/utility";
 import {
+  AvailableLangCodes,
   BCRYPT_SALT_NUMBER,
   HTTP_CONFLICT_CODE,
   HTTP_CREATED_CODE,
@@ -19,15 +20,26 @@ export const register = async (
   }>,
   response: FastifyReply
 ): Promise<FastifyReply> => {
-  const { username, name, surname, email, password, gender, biography } =
-    request.body;
+  const {
+    username,
+    name,
+    surname,
+    email,
+    password,
+    gender,
+    biography,
+    langCode,
+  } = request.body;
 
   const queryString = `
-    INSERT INTO "user" (username, name, surname, gender, biography, email, password)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO "user" (username, name, surname, gender, biography, email, password, preferred_languageId)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     ON CONFLICT DO NOTHING
     RETURNING id;
   `;
+
+  const langId =
+    AvailableLangCodes[langCode as keyof typeof AvailableLangCodes]; //I have to do this type asserting because even if we checked that whether langCode property is a key of AvailableLangCode object, typescript does not recognize as a key since we did that in another module.
 
   try {
     const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT_NUMBER);
@@ -40,6 +52,7 @@ export const register = async (
       biography,
       email,
       hashedPassword,
+      langId,
     ]);
 
     if (rowCount)

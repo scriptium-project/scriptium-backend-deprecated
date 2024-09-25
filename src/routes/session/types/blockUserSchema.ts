@@ -1,9 +1,6 @@
 import { z } from "zod";
-import { MAX_LENGTH_FOR_USERNAME, MIN_LENGTH_FOR_USERNAME } from "./utility";
+import { registerSchema } from "../../auth/types/registerSchema";
 
 export const blockUserSchema = z.object({
-  username: z
-    .string()
-    .min(MIN_LENGTH_FOR_USERNAME)
-    .max(MAX_LENGTH_FOR_USERNAME),
+  username: registerSchema.shape.username,
 });

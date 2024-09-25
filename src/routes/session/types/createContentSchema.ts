@@ -1,8 +1,6 @@
 import { z } from "zod";
-import {
-  CHAPTER_COUNT,
-  VERSE_COUNT_FOR_EACH_CHAPTER,
-} from "../../verse/types/utility";
+import { CHAPTER_COUNT } from "../../verse/types/utility";
+import { chapterVerseValidateFunction } from "../../../libs/utility/function/chapterVerseValidateFunction";
 
 export const createContentSchema = z
   .object({
@@ -11,20 +9,4 @@ export const createContentSchema = z
     collectionName: z.string().min(1).optional(),
     note: z.string().optional(),
   })
-  .superRefine((data, ctx) => {
-    const { chapterNumber, verseNumber } = data;
-    let maxVerseNumber: number;
-
-    if (
-      (maxVerseNumber = VERSE_COUNT_FOR_EACH_CHAPTER[chapterNumber - 1]) <
-      verseNumber
-    )
-      ctx.addIssue({
-        code: "too_big",
-        maximum: maxVerseNumber,
-        inclusive: true,
-        type: "string",
-        message: `verseNumber is too big; maximum upper limit is ${maxVerseNumber}`,
-        path: ["verseNumber"],
-      });
-  });
+  .superRefine(chapterVerseValidateFunction);

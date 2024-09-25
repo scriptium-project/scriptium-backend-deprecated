@@ -6,27 +6,33 @@ import {
   MAX_LENGTH_FOR_NAME,
   MAX_LENGTH_FOR_SURNAME,
   MIN_LENGTH_FOR_PASSWORD,
-  MIN_LETTERS_IN_USERNAME,
+  MIN_LETTERS_OR_NUMBERS_IN_USERNAME,
   MIN_LENGTH_FOR_USERNAME,
   MIN_LENGTH_FOR_SURNAME,
   MIN_LENGTH_FOR_NAME,
   MAX_LENGTH_FOR_BIOGRAPHY,
 } from "../../session/types/utility";
+import { langCodeRefineFunction } from "../../../libs/utility/types/utility";
 
 export const registerSchema = z.object({
   username: z
     .string()
-    .min(MIN_LENGTH_FOR_USERNAME)
-    .max(MAX_LENGTH_FOR_USERNAME)
-    .refine((value) => /^[a-zA-Z0-9_-]+$/.test(value), {
+    .min(MIN_LENGTH_FOR_USERNAME, {
+      message: `Username must be at least ${MIN_LENGTH_FOR_USERNAME} characters long.`,
+    })
+    .max(MAX_LENGTH_FOR_USERNAME, {
+      message: `Username must be at most ${MAX_LENGTH_FOR_USERNAME} characters long.`,
+    })
+    .refine((value) => /^[a-zA-Z0-9_.]+$/.test(value), {
       message:
-        "Username can only contain letters, numbers, underscores, and hyphens.",
+        "Username can only contain English letters, numbers, underscores, and dots.",
     })
     .refine(
       (value) =>
-        (value.match(/[a-zA-Z]/g) || []).length >= MIN_LETTERS_IN_USERNAME,
+        (value.match(/[a-zA-Z0-9]/g) || []).length >=
+        MIN_LETTERS_OR_NUMBERS_IN_USERNAME,
       {
-        message: `Username must contain at least ${MIN_LETTERS_IN_USERNAME} letters.`,
+        message: `Username must contain at least ${MIN_LETTERS_OR_NUMBERS_IN_USERNAME} letters or numbers.`,
       }
     ),
   name: z
@@ -34,28 +40,51 @@ export const registerSchema = z.object({
     .min(MIN_LENGTH_FOR_NAME, {
       message: `Name must be at least ${MIN_LENGTH_FOR_NAME} characters long.`,
     })
-    .max(MAX_LENGTH_FOR_NAME),
+    .max(MAX_LENGTH_FOR_NAME, {
+      message: `Name must be at most ${MAX_LENGTH_FOR_NAME} characters long.`,
+    }),
   surname: z
     .string()
     .min(MIN_LENGTH_FOR_SURNAME, {
       message: `Surname must be at least ${MIN_LENGTH_FOR_SURNAME} characters long.`,
     })
-    .max(MAX_LENGTH_FOR_SURNAME),
-  gender: z.string().length(1).optional(),
-  biography: z.string().min(1).max(MAX_LENGTH_FOR_BIOGRAPHY).optional(),
+    .max(MAX_LENGTH_FOR_SURNAME, {
+      message: `Surname must be at most ${MAX_LENGTH_FOR_SURNAME} characters long.`,
+    }),
+  gender: z.enum(["M", "F"], {
+    errorMap: () => ({ message: "Gender must be either 'M' or 'F'." }),
+  }),
+  biography: z
+    .string()
+    .min(1, { message: "Biography cannot be empty." })
+    .max(MAX_LENGTH_FOR_BIOGRAPHY, {
+      message: `Biography must be at most ${MAX_LENGTH_FOR_BIOGRAPHY} characters long.`,
+    })
+    .optional(),
   email: z
     .string()
-    .min(1)
+    .min(1, { message: "Email cannot be empty." })
     .email({ message: "Invalid email format." })
-    .max(MAX_LENGTH_FOR_EMAIL)
+    .max(MAX_LENGTH_FOR_EMAIL, {
+      message: `Email must be at most ${MAX_LENGTH_FOR_EMAIL} characters long.`,
+    })
     .transform((val) => val.toLowerCase()),
   password: z
     .string()
     .min(MIN_LENGTH_FOR_PASSWORD, {
       message: `Password must be at least ${MIN_LENGTH_FOR_PASSWORD} characters long.`,
     })
-    .max(MAX_LENGTH_FOR_PASSWORD)
+    .max(MAX_LENGTH_FOR_PASSWORD, {
+      message: `Password must be at most ${MAX_LENGTH_FOR_PASSWORD} characters long.`,
+    })
     .refine((value) => !/^\s|\s$/.test(value), {
       message: "Password cannot start or end with whitespace.",
     }),
+  langCode: z
+    .string()
+    .min(1)
+    .refine(langCodeRefineFunction, {
+      message: "Invalid language code.",
+    })
+    .default("en"),
 });

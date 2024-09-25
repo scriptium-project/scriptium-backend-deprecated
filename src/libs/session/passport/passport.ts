@@ -21,7 +21,7 @@ fastifyPassport.registerUserDeserializer<SerializedUser, User>(
         `${SelectFromUserExceptPasswordQuery} WHERE id = $1`,
         [id]
       );
-      if (!rowCount) request.session.destroy();
+      if ((rowCount ?? 0) === 0) request.session.destroy();
 
       return user;
     } catch (error) {

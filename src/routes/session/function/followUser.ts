@@ -24,6 +24,11 @@ export const followUser = async (
 
   const user = request.user as User;
 
+  if (user.username === username)
+    return response
+      .code(HTTP_CONFLICT_CODE)
+      .send(InformationConflictedResponse);
+
   let queryString = `
   SELECT 
     u.id, 
@@ -39,20 +44,28 @@ export const followUser = async (
 
   try {
     const {
-      rows: [result],
+      rows: [
+        { is_already_following, id, is_blocked, is_private } = {
+          is_already_following: false,
+          id: undefined,
+          is_blocked: false,
+          is_private: false,
+        }, // Defining default object to handle user couldn't found.
+      ],
     } = await db.query<FollowInformation>(queryString, [user.id, username]);
 
-    if (!result)
+    if (!id)
+      //If user couldn't found.
       return response
         .code(HTTP_BAD_REQUEST_CODE)
         .send(SomethingWentWrongResponse);
 
-    if (result.is_blocked)
+    if (is_blocked)
       return response
         .code(HTTP_FORBIDDEN_CODE)
         .send(SomethingWentWrongResponse);
 
-    if (result.is_already_following)
+    if (is_already_following)
       return response
         .code(HTTP_CONFLICT_CODE)
         .send(InformationConflictedResponse);
@@ -64,8 +77,8 @@ export const followUser = async (
 
     const { rowCount } = await db.query(queryString, [
       user.id,
-      result.id,
-      result.is_private ? "pending" : "accepted",
+      id,
+      is_private ? "pending" : "accepted",
     ]);
 
     if ((rowCount ?? 0) === 0)

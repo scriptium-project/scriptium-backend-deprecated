@@ -54,19 +54,33 @@ import { retrieveRequest } from "./function/retrieveRequest";
 import { retrieveRequestSchema } from "./types/retrieveRequestSchema";
 import { getFollowedSchema } from "./types/getFollowedSchema";
 import { getFollowed } from "./function/getFollowed";
+import { updateUser } from "./function/updateUser";
+import { updateUserSchema } from "./types/updateUserSchema";
+import { updatePasswordSchema } from "./types/updatePasswordSchema";
+import { updatePassword } from "./function/updatePassword";
 
 export default function sessionRoute(
   server: FastifyInstance,
   _opts: unknown,
   done: HookHandlerDoneFunction
 ): void {
-  //Session
-
   server.addHook("preValidation", checkAuthentication);
+
+  //Account
 
   server.post("/logout", logout);
 
   server.put("/alter", alterAccountType);
+
+  server.put("/update", {
+    preValidation: validateFunction({ BodyParams: updateUserSchema }),
+    handler: updateUser,
+  });
+
+  server.put("/update/password", {
+    preValidation: validateFunction({ BodyParams: updatePasswordSchema }),
+    handler: updatePassword,
+  });
 
   //Collections
 
