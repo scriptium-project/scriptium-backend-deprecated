@@ -1,9 +1,7 @@
 import type { FastifyRegisterOptions, Session } from "fastify";
 import db from "../db/db";
-import dotenv from "dotenv";
 import type { FastifySessionOptions, SessionStore } from "@fastify/session";
-
-dotenv.config();
+import { MILLISECONDS_IN_A_DAY } from "../utility/types/utility";
 
 export const secretKey = process.env.SESSION_STORAGE_SECRET_KEY;
 
@@ -28,7 +26,8 @@ const sessionStorage: SessionStore = {
       .then((result) => {
         const [session] = result.rows;
 
-        if (!session.session) throw new Error("Something went wrong!");
+        if (!session.session)
+          throw new Error("Something went unexpectedly wrong??");
 
         callback(null, session.session);
       })
@@ -69,13 +68,11 @@ const sessionStorage: SessionStore = {
   },
 };
 
-const MAX_AGE = 864e5; //Milliseconds in one day.
-
 export const fastifySessionOptions: FastifyRegisterOptions<FastifySessionOptions> =
   {
     secret: secretKey,
     cookie: {
-      maxAge: MAX_AGE,
+      maxAge: MILLISECONDS_IN_A_DAY,
       secure: false,
       httpOnly: true,
     },

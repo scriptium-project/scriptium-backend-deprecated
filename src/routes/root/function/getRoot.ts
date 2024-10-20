@@ -1,3 +1,5 @@
+// getRoot.ts
+
 import type { FastifyReply, FastifyRequest } from "fastify";
 import db from "../../../libs/db/db";
 import {
@@ -17,49 +19,51 @@ export async function getRoot(
   }>,
   response: FastifyReply
 ): Promise<void | FastifyReply> {
-  const { rootLatin, langCode } = request.params;
-
-  //TODO: Create View
+  const { rootLatin, langCode, scriptureNumber } = request.params;
 
   const queryString: string = `
- WITH verse_data AS (
+  WITH verse_data AS (
     SELECT 
-        root.latin,
-        root.own,
-        NULL as meaning,
-        JSON_AGG(
-        		  JSON_BUILD_OBJECT(
-        							          'chapterNumber', verse.chapterId,
-        							          'verseNumber', verse.versenumber,
-        							          'verseText', verse.text,
-        							          'transliteration', transliteration.transliteration,
-        							          'sequence', word.sequenceNumber,
-        							          'word', word.text,
-        							          'meaning', NULL
-        					  	          )
-        		      ) as verse
+      root.latin,
+      root.own,
+      NULL as meaning,
+      JSON_AGG(
+        JSON_BUILD_OBJECT(
+          'chapterNumber', c.id,
+          'verseNumber', v.verse_number,
+          'verseText', v.text,
+          'transliteration', t.transliteration,
+          'sequence', w.sequence_number,
+          'word', w.text,
+          'meaning', NULL
+        ) ORDER BY v.id
+      ) AS verses
     FROM root
-    LEFT JOIN word ON word.rootId = root.Id
-    LEFT JOIN verse ON word.verseId = verse.Id
-    LEFT JOIN transliteration ON transliteration.verseId = verse.Id
-    LEFT JOIN language lang ON transliteration.langId = lang.Id
-    WHERE root.latin = $1 AND ($2::text IS NULL OR lang.langCode = $2::text)
+    JOIN word w ON w.root_id = root.id
+    JOIN verse v ON w.verse_id = v.id
+    JOIN chapter c ON v.chapter_id = c.id
+    JOIN section s ON c.section_id = s.id
+    JOIN scripture sc ON s.scripture_id = sc.id
+    LEFT JOIN transliteration t ON t.verse_id = v.id AND ($3::text IS NULL OR t.lang_id = (SELECT id FROM language WHERE lang_code = $3))
+    WHERE root.latin = $1
+      AND root.scripture_id = $2
     GROUP BY root.latin, root.own
-                )
-SELECT 
+  )
+  SELECT 
     latin,
     own,
     meaning,
-    verse,
-    json_array_length(verse) AS verse_count
-FROM verse_data;
-`;
+    verses,
+    json_array_length(verses) AS verse_count
+  FROM verse_data;
+  `;
 
   try {
     const {
       rows: [data],
     } = await db.query<getRootResponseSchema>(queryString, [
       rootLatin,
+      scriptureNumber,
       langCode ?? null,
     ]);
 
@@ -67,7 +71,7 @@ FROM verse_data;
 
     response.code(HTTP_OK_CODE).send({ data });
 
-    //Caching
+    // Caching
     await db.query("INSERT INTO cache (key, data) VALUES ($1,$2)", [
       request.url,
       data,

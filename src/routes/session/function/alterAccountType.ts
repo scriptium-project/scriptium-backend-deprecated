@@ -17,11 +17,11 @@ export const alterAccountType = async (
   const user = request.user as User;
 
   const queryString = `UPDATE "user"
-SET is_private = CASE 
-                   WHEN is_private IS NULL THEN CURRENT_TIMESTAMP 
-                   ELSE NULL 
-                 END
-WHERE id = $1`;
+                        SET is_private = CASE 
+                          WHEN is_private IS NULL THEN CURRENT_TIMESTAMP 
+                          ELSE NULL 
+                        END
+                      WHERE id = $1`;
 
   try {
     const { rowCount } = await db.query(queryString, [user.id]);

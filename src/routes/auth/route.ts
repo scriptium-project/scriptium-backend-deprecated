@@ -4,6 +4,12 @@ import { registerSchema } from "./types/registerSchema";
 import { loginSchema } from "./types/loginSchema";
 import { register } from "./function/register";
 import { login } from "./function/login";
+import { rateLimitCreatorFunction } from "../../libs/utility/function/rateLimiterFunction";
+import { REQUEST_COUNT_FOR_AUTH_ROUTE } from "./types/utility";
+
+const authRouteRateLimitConfigProperty = rateLimitCreatorFunction(
+  REQUEST_COUNT_FOR_AUTH_ROUTE
+);
 
 export default function authRoute(
   server: FastifyInstance,
@@ -11,11 +17,13 @@ export default function authRoute(
   done: HookHandlerDoneFunction
 ): void {
   server.post("/register", {
+    config: { rateLimit: authRouteRateLimitConfigProperty },
     preValidation: validateFunction({ BodyParams: registerSchema }),
     handler: register,
   });
 
   server.post("/login", {
+    config: { rateLimit: authRouteRateLimitConfigProperty },
     preValidation: validateFunction({ BodyParams: loginSchema }),
     handler: login,
   });

@@ -56,7 +56,7 @@ export default [
         { ignore: [0, 1], ignoreArrayIndexes: true },
       ],
       complexity: ["warn", { max: 10 }],
-      "max-params": ["warn", 3],
+      "max-params": ["warn", 5],
       "no-else-return": "warn",
       "no-useless-escape": "error",
     },

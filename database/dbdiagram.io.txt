@@ -1,0 +1,545 @@
+Table "block" {
+  "id" uuid [pk, not null, default: `gen_random_uuid()`]
+  "blocker_id" uuid [not null]
+  "blocked_id" uuid [not null]
+  "blocked_at" timestamp [default: `CURRENT_TIMESTAMP`]
+  "reason" "character varying(100)"
+
+  Indexes {
+    (blocker_id, blocked_id) [unique, name: "block_blocker_id_blocked_id_key"]
+  }
+}
+
+Table "cache" {
+  "id" integer [pk, not null]
+  "key" "character varying(126)" [unique, not null]
+  "data" jsonb [not null]
+}
+
+Table "cache_r" {
+  "id" bigint [pk, not null]
+  "cacheid" integer [not null]
+  "fetched_at" timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "chapter" {
+  "id" integer [pk, not null]
+  "chapter_name" text [unique, not null]
+  "chapter_number" smallint [not null]
+  "verse_count" smallint [not null]
+  "page_number" smallint [not null]
+  "section_id" integer [not null]
+
+  Indexes {
+    (section_id, id) [unique, name: "chapter_section_id_id_key"]
+  }
+}
+
+Table "chapter_meaning" {
+  "id" integer [pk, not null]
+  "meaning" "character varying(50)"
+  "chapter_id" smallint [not null]
+  "lang_id" smallint [not null]
+
+  Indexes {
+    (lang_id, chapter_id) [unique, name: "chapter_meaning_lang_id_chapter_id_key"]
+  }
+}
+
+Table "collection" {
+  "id" uuid [pk, not null, default: `gen_random_uuid()`]
+  "name" "character varying(100)" [not null, default: `''::charactervarying`]
+  "description" "character varying(250)"
+  "user_id" uuid [not null]
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    (user_id, name) [unique, name: "collection_user_id_name_key"]
+  }
+}
+
+Table "collection_verse" {
+  "id" uuid [pk, not null, default: `gen_random_uuid()`]
+  "collection_id" uuid [not null]
+  "verse_id" integer [not null]
+  "saved_at" timestamp [default: `CURRENT_TIMESTAMP`]
+  "note" "character varying(250)"
+
+  Indexes {
+    (collection_id, verse_id) [unique, name: "collection_verse_collection_id_verse_id_key"]
+  }
+}
+
+Table "comment" {
+  "id" uuid [pk, not null, default: `gen_random_uuid()`]
+  "user_id" uuid [not null]
+  "text" "character varying(500)" [not null]
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+  "updated_at" timestamp
+  "parent_comment_id" uuid
+
+  Indexes {
+    user_id [type: btree, name: "idx_comment_user_id"]
+    parent_comment_id [type: btree, name: "idx_parent_comment"]
+  }
+}
+
+Table "comment_note" {
+  "comment_id" uuid [pk, not null]
+  "note_id" uuid [not null]
+
+  Indexes {
+    comment_id [type: btree, name: "idx_comment_note_comment_id"]
+    note_id [type: btree, name: "idx_comment_note_note_id"]
+  }
+}
+
+Table "comment_verse" {
+  "comment_id" uuid [pk, not null]
+  "verse_id" integer [not null]
+
+  Indexes {
+    comment_id [type: btree, name: "idx_comment_verse_comment_id"]
+    verse_id [type: btree, name: "idx_comment_verse_verse_id"]
+  }
+}
+
+Table "follow" {
+  "id" bigint [pk, not null]
+  "follower_id" uuid [not null]
+  "followed_id" uuid [not null]
+  "status" public.follow_status [not null, default: `'accepted'::public.follow_status`]
+  "occurred_at" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    (follower_id, followed_id) [unique, name: "follow_follower_id_followed_id_key"]
+  }
+}
+
+Table "follow_r" {
+  "id" bigint [pk, not null]
+  "follower_id" uuid [not null]
+  "followed_id" uuid [not null]
+  "status" public.follow_r_status
+  "occurred_at" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table "footnote" {
+  "id" integer [pk, not null]
+  "number" smallint [not null]
+  "index" smallint [not null]
+  "translation_text_id" bigint [not null]
+  "footnote_text_id" integer [not null]
+
+  Indexes {
+    (translation_text_id, index, footnote_text_id) [unique, name: "footnote_translation_text_id_index_footnote_text_id_key"]
+  }
+}
+
+Table "footnote_text" {
+  "id" integer [pk, not null]
+  "text" text [not null]
+
+  Indexes {
+    `"left"(text,2048)` [type: btree, unique, name: "unique_partial_text"]
+  }
+}
+
+Table "freeze_r" {
+  "id" bigint [pk, not null]
+  "status" public.freeze_status [not null]
+  "user_id" uuid [not null]
+  "proceed_at" timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "language" {
+  "id" smallint [pk, not null]
+  "lang_code" "character varying(2)" [unique, not null]
+  "lang_own" "character varying(20)" [not null]
+  "lang_english" "character varying(20)" [not null]
+}
+
+Table "like" {
+  "id" bigint [pk, not null]
+  "user_id" uuid [not null]
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    user_id [type: btree, name: "idx_like_userid"]
+  }
+}
+
+Table "like_comment" {
+  "likeid" bigint [pk, not null]
+  "comment_id" uuid [not null]
+
+  Indexes {
+    (likeid, comment_id) [unique, name: "like_comment_likeid_comment_id_key"]
+    comment_id [type: btree, name: "idx_like_comment_commentid"]
+  }
+}
+
+Table "like_note" {
+  "likeid" bigint [pk, not null]
+  "note_id" uuid [not null]
+
+  Indexes {
+    (likeid, note_id) [unique, name: "like_note_likeid_note_id_key"]
+    note_id [type: btree, name: "idx_like_note_note_id"]
+  }
+}
+
+Table "like_r" {
+  "id" bigint [pk, not null]
+  "user_id" uuid [not null]
+  "action_type" public.like_action [not null]
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "like_r_comment" {
+  "like_r_id" bigint [pk, not null]
+  "comment_id" uuid [not null]
+}
+
+Table "like_r_note" {
+  "like_r_id" bigint [pk, not null]
+  "note_id" uuid [not null]
+}
+
+Table "note" {
+  "id" uuid [pk, not null, default: `gen_random_uuid()`]
+  "user_id" uuid [not null]
+  "text" text [not null]
+  "verse_id" integer [not null]
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+  "updated_at" timestamp
+
+  Indexes {
+    (user_id, verse_id) [type: btree, name: "idx_note_userid_verse_id"]
+  }
+}
+
+Table "notification" {
+  "id" bigint [pk, not null]
+  "recipient_id" uuid [not null]
+  "actor_id" uuid [not null]
+  "notification_type" public.notification_type [not null]
+  "entity_type" public.entity_type
+  "entity_id" uuid
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+  "is_read" boolean [default: false]
+}
+
+Table "rate_limit" {
+  "key" text [pk, not null]
+  "count" integer [not null]
+  "expiration" bigint [not null]
+}
+
+Table "request_logs" {
+  "id" bigint [pk, not null]
+  "identifier" "character varying(126)" [not null]
+  "endpoint" "character varying(126)" [not null]
+  "method" "character varying(10)" [not null]
+  "status_code" integer [not null]
+  "occurred_at" timestamp [not null, default: `now()`]
+}
+
+Table "role" {
+  "id" smallint [pk, not null]
+  "role" "character varying(15)" [unique, not null]
+  "description" "character varying(250)"
+}
+
+Table "root" {
+  "id" integer [pk, not null]
+  "latin" "character varying(5)" [not null]
+  "own" "character varying(5)" [not null]
+  "scripture_id" smallint [not null]
+
+  Indexes {
+    (latin, own, scripture_id) [unique, name: "root_latin_own_scripture_id_key"]
+  }
+}
+
+Table "scripture" {
+  "id" smallint [pk, not null]
+  "scripture_name" "character varying(50)" [unique, not null]
+  "scripture_code" "character varying(1)" [unique, not null]
+  "section_count" smallint [not null]
+}
+
+Table "scripture_meaning" {
+  "id" integer [pk, not null]
+  "meaning" "character varying(50)"
+  "scripture_id" smallint [not null]
+  "lang_id" smallint [not null]
+
+  Indexes {
+    (lang_id, scripture_id) [unique, name: "scripture_meaning_lang_id_scripture_id_key"]
+  }
+}
+
+Table "section" {
+  "id" integer [pk, not null]
+  "section_name" "character varying(100)" [unique, not null]
+  "section_number" smallint [not null]
+  "chapter_count" smallint [not null]
+  "scripture_id" smallint [not null]
+
+  Indexes {
+    (scripture_id, section_number) [unique, name: "section_scripture_id_section_number_key"]
+  }
+}
+
+Table "section_meaning" {
+  "id" integer [pk, not null]
+  "meaning" "character varying(50)"
+  "section_id" smallint [not null]
+  "lang_id" smallint [not null]
+
+  Indexes {
+    (lang_id, section_id) [unique, name: "section_meaning_lang_id_section_id_key"]
+  }
+}
+
+Table "session" {
+  "id" "character varying(100)" [pk, not null]
+  "user_id" uuid
+  "expires_at" timestamp
+  "session" jsonb [not null]
+}
+
+Table "suggestion" {
+  "id" bigint [pk, not null]
+  "user_id" uuid [not null]
+  "translation_text_id" bigint [not null]
+  "suggestion" "character varying(500)" [not null]
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+
+  Indexes {
+    (user_id, translation_text_id) [unique, name: "suggestion_user_id_translation_text_id_key"]
+  }
+}
+
+Table "translation" {
+  "id" smallint [pk, not null]
+  "name" "character varying(100)" [not null]
+  "lang_id" smallint [not null, default: 1]
+  "prod_year" date
+  "date_added" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "is_eager" timestamp
+}
+
+Table "translation_text" {
+  "id" bigint [pk, not null]
+  "translation" text [not null]
+  "translation_id" smallint [not null]
+  "verse_id" integer [not null]
+
+  Indexes {
+    (translation, translation_id, verse_id) [unique, name: "translation_text_translation_translation_id_verse_id_key"]
+  }
+}
+
+Table "translator" {
+  "id" smallint [pk, not null]
+  "full_name" "character varying(100)" [not null]
+  "url" "character varying(2000)"
+  "lang_id" smallint [not null]
+}
+
+Table "translator_translation" {
+  "id" smallint [pk, not null]
+  "translator_id" smallint [not null]
+  "translation_id" smallint [not null]
+
+  Indexes {
+    (translation_id, translator_id) [unique, name: "translator_translation_translation_id_translator_id_key"]
+  }
+}
+
+Table "transliteration" {
+  "id" integer [pk, not null]
+  "lang_id" smallint [not null]
+  "transliteration" "character varying(1500)" [not null]
+  "verse_id" integer [not null]
+}
+
+Table "user" {
+  "id" uuid [pk, not null, default: `gen_random_uuid()`]
+  "username" "character varying(24)" [unique, not null]
+  "name" "character varying(30)" [not null]
+  "surname" "character varying(30)" [not null]
+  "gender" "character (1)"
+  "biography" "character varying(200)"
+  "email" "character varying(255)" [unique, not null]
+  "email_verified" timestamp
+  "password" "character varying(255)" [not null]
+  "created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+  "last_active" timestamp
+  "is_frozen" timestamp
+  "is_private" timestamp
+  "role_id" smallint
+  "preferred_languageid" smallint [default: 1]
+
+  Indexes {
+    `lower((username)::text)` [type: btree, unique, name: "unique_username_ci"]
+  }
+}
+
+Table "verse" {
+  "id" integer [pk, not null]
+  "verse_number" smallint [not null]
+  "text" "character varying(1178)" [not null]
+  "text_simplified" "character varying(1178)" [not null]
+  "text_no_vowel" "character varying(1178)" [not null]
+  "page_number" smallint [not null]
+  "chapter_id" integer [not null]
+
+  Indexes {
+    (chapter_id, verse_number) [unique, name: "verse_chapter_id_verse_number_key"]
+  }
+}
+
+Table "word" {
+  "id" integer [pk, not null]
+  "sequence_number" smallint
+  "text" "character varying(22)" [not null]
+  "text_no_vowel" "character varying(22)" [not null]
+  "verse_id" integer [not null]
+  "root_id" integer
+
+  Indexes {
+    (sequence_number, verse_id) [unique, name: "word_sequence_number_verse_id_key"]
+  }
+}
+
+Table "word_meaning" {
+  "id" bigint [pk, not null]
+  "meaning" "character varying(100)" [not null]
+  "word_id" smallint [not null]
+  "lang_id" smallint [not null]
+
+  Indexes {
+    (word_id, lang_id) [unique, name: "word_meaning_word_id_lang_id_key"]
+  }
+}
+
+Ref "block_blocked_id_fkey":"user"."id" < "block"."blocked_id" [update: cascade, delete: cascade]
+
+Ref "block_blocker_id_fkey":"user"."id" < "block"."blocker_id" [update: cascade, delete: cascade]
+
+Ref "cache_r_cacheid_fkey":"cache"."id" < "cache_r"."cacheid" [update: cascade, delete: cascade]
+
+Ref "chapter_meaning_chapter_id_fkey":"chapter"."id" < "chapter_meaning"."chapter_id"
+
+Ref "chapter_meaning_lang_id_fkey":"language"."id" < "chapter_meaning"."lang_id"
+
+Ref "chapter_section_id_fkey":"section"."id" < "chapter"."section_id" [update: cascade, delete: restrict]
+
+Ref "collection_user_id_fkey":"user"."id" < "collection"."user_id" [update: cascade, delete: cascade]
+
+Ref "collection_verse_collection_id_fkey":"collection"."id" < "collection_verse"."collection_id" [update: cascade, delete: cascade]
+
+Ref "collection_verse_verse_id_fkey":"verse"."id" < "collection_verse"."verse_id" [update: cascade, delete: restrict]
+
+Ref "comment_note_comment_id_fkey":"comment"."id" < "comment_note"."comment_id" [update: cascade, delete: cascade]
+
+Ref "comment_note_note_id_fkey":"note"."id" < "comment_note"."note_id" [update: cascade, delete: cascade]
+
+Ref "comment_parent_comment_id_fkey":"comment"."id" < "comment"."parent_comment_id" [update: cascade, delete: cascade]
+
+Ref "comment_user_id_fkey":"user"."id" < "comment"."user_id" [update: cascade, delete: cascade]
+
+Ref "comment_verse_comment_id_fkey":"comment"."id" < "comment_verse"."comment_id" [update: cascade, delete: cascade]
+
+Ref "comment_verse_verse_id_fkey":"verse"."id" < "comment_verse"."verse_id" [update: cascade, delete: restrict]
+
+Ref "follow_followed_id_fkey":"user"."id" < "follow"."followed_id" [update: cascade, delete: cascade]
+
+Ref "follow_follower_id_fkey":"user"."id" < "follow"."follower_id" [update: cascade, delete: cascade]
+
+Ref "follow_r_followed_id_fkey":"user"."id" < "follow_r"."followed_id" [update: cascade, delete: cascade]
+
+Ref "follow_r_follower_id_fkey":"user"."id" < "follow_r"."follower_id" [update: cascade, delete: cascade]
+
+Ref "footnote_footnote_text_id_fkey":"footnote_text"."id" < "footnote"."footnote_text_id" [update: cascade, delete: cascade]
+
+Ref "footnote_translation_text_id_fkey":"translation_text"."id" < "footnote"."translation_text_id" [update: cascade, delete: cascade]
+
+Ref "freeze_r_user_id_fkey":"user"."id" < "freeze_r"."user_id" [update: cascade, delete: cascade]
+
+Ref "like_comment_comment_id_fkey":"comment"."id" < "like_comment"."comment_id" [update: cascade, delete: cascade]
+
+Ref "like_comment_likeid_fkey":"like"."id" < "like_comment"."likeid" [update: cascade, delete: cascade]
+
+Ref "like_note_likeid_fkey":"like"."id" < "like_note"."likeid" [update: cascade, delete: cascade]
+
+Ref "like_note_note_id_fkey":"note"."id" < "like_note"."note_id" [update: cascade, delete: cascade]
+
+Ref "like_r_comment_comment_id_fkey":"comment"."id" < "like_r_comment"."comment_id" [update: cascade, delete: cascade]
+
+Ref "like_r_comment_like_r_id_fkey":"like_r"."id" < "like_r_comment"."like_r_id" [update: cascade, delete: cascade]
+
+Ref "like_r_note_like_r_id_fkey":"like_r"."id" < "like_r_note"."like_r_id" [update: cascade, delete: cascade]
+
+Ref "like_r_note_note_id_fkey":"note"."id" < "like_r_note"."note_id" [update: cascade, delete: cascade]
+
+Ref "like_r_user_id_fkey":"user"."id" < "like_r"."user_id" [update: cascade, delete: cascade]
+
+Ref "like_user_id_fkey":"user"."id" < "like"."user_id" [update: cascade, delete: cascade]
+
+Ref "note_user_id_fkey":"user"."id" < "note"."user_id" [update: cascade, delete: cascade]
+
+Ref "note_verse_id_fkey":"verse"."id" < "note"."verse_id" [update: cascade, delete: restrict]
+
+Ref "notification_actor_id_fkey":"user"."id" < "notification"."actor_id" [update: cascade, delete: cascade]
+
+Ref "notification_recipient_id_fkey":"user"."id" < "notification"."recipient_id" [update: cascade, delete: cascade]
+
+Ref "root_scripture_id_fkey":"scripture"."id" < "root"."scripture_id" [update: cascade, delete: restrict]
+
+Ref "scripture_meaning_lang_id_fkey":"language"."id" < "scripture_meaning"."lang_id"
+
+Ref "scripture_meaning_scripture_id_fkey":"scripture"."id" < "scripture_meaning"."scripture_id"
+
+Ref "section_meaning_lang_id_fkey":"language"."id" < "section_meaning"."lang_id"
+
+Ref "section_meaning_section_id_fkey":"section"."id" < "section_meaning"."section_id"
+
+Ref "section_scripture_id_fkey":"scripture"."id" < "section"."scripture_id" [update: cascade, delete: restrict]
+
+Ref "suggestion_translation_text_id_fkey":"translation_text"."id" < "suggestion"."translation_text_id" [update: cascade, delete: cascade]
+
+Ref "suggestion_user_id_fkey":"user"."id" < "suggestion"."user_id" [update: cascade, delete: cascade]
+
+Ref "translation_lang_id_fkey":"language"."id" < "translation"."lang_id" [update: cascade, delete: restrict]
+
+Ref "translation_text_translation_id_fkey":"translation"."id" < "translation_text"."translation_id" [update: cascade, delete: cascade]
+
+Ref "translation_text_verse_id_fkey":"verse"."id" < "translation_text"."verse_id" [update: cascade, delete: restrict]
+
+Ref "translator_lang_id_fkey":"language"."id" < "translator"."lang_id" [update: cascade, delete: restrict]
+
+Ref "translator_translation_translation_id_fkey":"translation"."id" < "translator_translation"."translation_id" [update: cascade, delete: cascade]
+
+Ref "translator_translation_translator_id_fkey":"translator"."id" < "translator_translation"."translator_id" [update: cascade, delete: cascade]
+
+Ref "transliteration_lang_id_fkey":"language"."id" < "transliteration"."lang_id"
+
+Ref "transliteration_verse_id_fkey":"verse"."id" < "transliteration"."verse_id" [update: cascade, delete: restrict]
+
+Ref "user_preferred_languageid_fkey":"language"."id" < "user"."preferred_languageid" [update: cascade, delete: set null]
+
+Ref "user_role_id_fkey":"role"."id" < "user"."role_id" [update: cascade, delete: set null]
+
+Ref "verse_chapter_id_fkey":"chapter"."id" < "verse"."chapter_id" [update: cascade, delete: restrict]
+
+Ref "word_meaning_lang_id_fkey":"language"."id" < "word_meaning"."lang_id" [update: cascade, delete: restrict]
+
+Ref "word_meaning_word_id_fkey":"word"."id" < "word_meaning"."word_id" [update: cascade, delete: restrict]
+
+Ref "word_root_id_fkey":"root"."id" < "word"."root_id" [update: cascade, delete: restrict]
+
+Ref "word_verse_id_fkey":"verse"."id" < "word"."verse_id" [update: cascade, delete: restrict]

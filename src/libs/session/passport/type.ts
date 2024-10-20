@@ -1,3 +1,4 @@
+import type { UUID } from "crypto";
 import type { AvailableRoles } from "../utility";
 
 export type SerializedUser = string;
@@ -5,7 +6,7 @@ export type SerializedUser = string;
 type RoleId = (typeof AvailableRoles)[keyof typeof AvailableRoles]["id"];
 
 export type User = {
-  id: string;
+  id: UUID;
   username: string;
   name?: string | null;
   surname?: string | null;
@@ -19,6 +20,7 @@ export type User = {
   is_frozen?: Date | null;
   role_id: RoleId;
   is_private?: Date | null;
+  preferred_languageid: number;
 };
 
 //Extending the PassportUser interface

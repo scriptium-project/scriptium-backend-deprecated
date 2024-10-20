@@ -3,7 +3,7 @@ import type { SerializedUser } from "./type";
 import type { User } from "./type";
 import db from "../../db/db";
 
-export const SelectFromUserExceptPasswordQuery = `SELECT id, username, name, surname, gender, biography, email, email_verified, created_at, last_active, is_frozen, is_private, role_id FROM "user"`;
+export const SelectFromUserExceptPasswordQuery = `SELECT id, username, name, surname, gender, biography, email, email_verified, created_at, last_active, is_private, role_id, preferred_languageId FROM "user"`;
 
 export const fastifyPassport = new Authenticator();
 
@@ -16,12 +16,14 @@ fastifyPassport.registerUserDeserializer<SerializedUser, User>(
     try {
       const {
         rows: [user],
-        rowCount,
       } = await db.query<User>(
         `${SelectFromUserExceptPasswordQuery} WHERE id = $1`,
         [id]
       );
-      if ((rowCount ?? 0) === 0) request.session.destroy();
+      if (user === null) {
+        request.session.destroy();
+        return null as unknown as User;
+      }
 
       return user;
     } catch (error) {

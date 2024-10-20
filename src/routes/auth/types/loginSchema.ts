@@ -1,8 +1,8 @@
 import { z } from "zod";
 import {
+  MAX_LENGTH_FOR_USERNAME,
   MAX_LENGTH_FOR_EMAIL,
   MAX_LENGTH_FOR_PASSWORD,
-  MAX_LENGTH_FOR_USERNAME,
 } from "../../session/types/utility";
 
 export const loginSchema = z.object({

@@ -1,7 +1,4 @@
 import type { NegativeResponse, PositiveResponse } from "./types";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 if (!process.env.BCRYPT_SALT_NUMBER) throw new Error("Something went wrong!");
 
@@ -32,6 +29,7 @@ export const HTTP_BAD_GATEWAY_CODE = 502;
 export const HTTP_SERVICE_UNAVAILABLE_CODE = 503;
 export const HTTP_GATEWAY_TIMEOUT_CODE = 504;
 
+export const MILLISECONDS_IN_A_DAY = 864e5;
 // Constants
 
 export const MAX_PAGE_COUNT = 604;
@@ -104,3 +102,12 @@ export const AvailableLangCodes = {
   tr: 2,
   de: 3,
 } as const;
+
+export const Scriptures = {
+  t: 1, //Torah.
+  b: 2, //Bible.
+} as const;
+
+export const new Error("Something went unexpectedly wrong??"); = new Error(
+  "Something went unexpectedly wrong?"
+);

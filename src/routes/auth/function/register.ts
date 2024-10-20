@@ -13,6 +13,7 @@ import {
   InternalServerErrorResponse,
 } from "../../../libs/utility/types/utility";
 import type { UserPick } from "../../../libs/utility/types/types";
+import type { User } from "../../../libs/session/passport/type";
 
 export const register = async (
   request: FastifyRequest<{
@@ -32,10 +33,10 @@ export const register = async (
   } = request.body;
 
   const queryString = `
-    INSERT INTO "user" (username, name, surname, gender, biography, email, password, preferred_languageId)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO "user" (username, name, surname, gender, biography, email, password, preferred_languageId, last_active)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
     ON CONFLICT DO NOTHING
-    RETURNING id;
+    RETURNING *;
   `;
 
   const langId =
@@ -44,7 +45,10 @@ export const register = async (
   try {
     const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT_NUMBER);
 
-    const { rowCount } = await db.query(queryString, [
+    const {
+      rowCount,
+      rows: [user],
+    } = await db.query<User>(queryString, [
       username,
       name,
       surname,
@@ -55,8 +59,10 @@ export const register = async (
       langId,
     ]);
 
-    if (rowCount)
+    if (rowCount && user) {
+      await request.logIn(user);
       return response.code(HTTP_CREATED_CODE).send(UserCreatedResponse);
+    }
 
     const conflictCheckQuery = `
         SELECT username, email FROM "user"

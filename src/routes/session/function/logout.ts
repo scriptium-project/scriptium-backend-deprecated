@@ -4,7 +4,6 @@ import {
   HTTP_INTERNAL_SERVER_ERROR_CODE,
   InternalServerErrorResponse,
 } from "../../../libs/utility/types/utility";
-
 import { LoggedOutResponse } from "../types/utility";
 
 export const logout = async (
@@ -13,6 +12,7 @@ export const logout = async (
 ): Promise<FastifyReply> => {
   try {
     await request.logOut();
+    request.session.destroy();
 
     return response.code(HTTP_ACCEPTED_CODE).send(LoggedOutResponse);
   } catch (error) {

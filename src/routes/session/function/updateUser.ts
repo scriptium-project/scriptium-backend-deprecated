@@ -10,16 +10,15 @@ import {
   SomethingWentWrongResponse,
 } from "../../../libs/utility/types/utility";
 import type { z } from "zod";
-import type { updateUserSchema } from "../types/updateUserSchema";
 import type { User } from "../../../libs/session/passport/type";
 import db from "../../../libs/db/db";
+import type { updateUserSchema } from "../types/updateUserSchema";
 
 export const updateUser = async (
   request: FastifyRequest<{ Body: z.infer<typeof updateUserSchema> }>,
   response: FastifyReply
 ): Promise<FastifyReply> => {
   const bodyEntries = Object.entries(request.body);
-
   const user = request.user as User;
 
   const propertyPairs = [];
@@ -27,6 +26,7 @@ export const updateUser = async (
 
   for (let i = 0; i < bodyEntries.length; i++) {
     const [key, value] = bodyEntries[i];
+
     if (!value) continue;
 
     propertyPairs.push(`${key} = $${i + 1}`);

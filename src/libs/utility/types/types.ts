@@ -1,4 +1,9 @@
+import { z } from "zod";
 import type { User } from "../../session/passport/type";
+import {
+  isValidScriptureCode,
+  transformScriptureNumber,
+} from "../function/isValidScriptureCode";
 
 /**
  *  A comprehensive type for regular negative responses.
@@ -40,3 +45,55 @@ export type UserPick<T extends keyof User> = Pick<User, T>;
  * @returns Returns the type of specified property of User type.
  */
 export type UserProperty<T extends keyof User> = User[T];
+
+export type CacheRow = {
+  id: number;
+  data: JSON;
+  key: string;
+};
+
+export type ProcessResult = {
+  code: number;
+  message: string;
+  success: boolean;
+  [key: string]: unknown;
+};
+
+export const zScriptureSectionChapterVerseQuerySchema = {
+  scriptureNumber: z
+    .string()
+    .min(1)
+    .max(1)
+    .refine(isValidScriptureCode)
+    .transform(transformScriptureNumber),
+  sectionNumber: z
+    .string()
+    .transform((val: string) => parseInt(val))
+    .refine((val: number) => !isNaN(val), {
+      message: "sectionNumber must be a valid number",
+    }),
+  chapterNumber: z
+    .string()
+    .transform((val: string) => parseInt(val))
+    .refine((val: number) => !isNaN(val), {
+      message: "chapterNumber must be a valid number",
+    }),
+  verseNumber: z
+    .string()
+    .transform((val: string) => parseInt(val))
+    .refine((val: number) => !isNaN(val), {
+      message: "verseNumber must be a valid number",
+    }),
+};
+
+export const zScriptureSectionChapterVerseBodySchema = {
+  scriptureNumber: z
+    .string()
+    .min(1)
+    .max(1)
+    .refine(isValidScriptureCode)
+    .transform(transformScriptureNumber),
+  sectionNumber: z.number().int(),
+  chapterNumber: z.number().int(),
+  verseNumber: z.number().int(),
+};

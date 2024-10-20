@@ -1,6 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
-import type { updatePasswordSchema } from "../types/updatePasswordSchema";
 import {
   BCRYPT_SALT_NUMBER,
   DoneResponse,
@@ -15,6 +14,7 @@ import { isPasswordTrue } from "../../../libs/utility/function/isPasswordTrue";
 import { BadCredentialsResponse } from "../../auth/types/utility";
 import * as bcrypt from "bcrypt";
 import db from "../../../libs/db/db";
+import type { updatePasswordSchema } from "../types/updatePasswordSchema";
 
 export const updatePassword = async (
   request: FastifyRequest<{ Body: z.infer<typeof updatePasswordSchema> }>,
@@ -23,6 +23,7 @@ export const updatePassword = async (
   const { password, newPassword } = request.body;
 
   const user = request.user as User;
+
   try {
     if (!(await isPasswordTrue(user, password)))
       return response.code(HTTP_BAD_REQUEST_CODE).send(BadCredentialsResponse);

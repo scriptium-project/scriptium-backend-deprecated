@@ -1,18 +1,18 @@
 import { z } from "zod";
-import {
-  MAX_LENGTH_FOR_EMAIL,
-  MAX_LENGTH_FOR_PASSWORD,
-  MAX_LENGTH_FOR_USERNAME,
-  MAX_LENGTH_FOR_NAME,
-  MAX_LENGTH_FOR_SURNAME,
-  MIN_LENGTH_FOR_PASSWORD,
-  MIN_LETTERS_OR_NUMBERS_IN_USERNAME,
-  MIN_LENGTH_FOR_USERNAME,
-  MIN_LENGTH_FOR_SURNAME,
-  MIN_LENGTH_FOR_NAME,
-  MAX_LENGTH_FOR_BIOGRAPHY,
-} from "../../session/types/utility";
 import { langCodeRefineFunction } from "../../../libs/utility/types/utility";
+import {
+  MIN_LENGTH_FOR_USERNAME,
+  MAX_LENGTH_FOR_USERNAME,
+  MIN_LETTERS_OR_NUMBERS_IN_USERNAME,
+  MIN_LENGTH_FOR_NAME,
+  MAX_LENGTH_FOR_NAME,
+  MIN_LENGTH_FOR_SURNAME,
+  MAX_LENGTH_FOR_SURNAME,
+  MAX_LENGTH_FOR_BIOGRAPHY,
+  MAX_LENGTH_FOR_EMAIL,
+  MIN_LENGTH_FOR_PASSWORD,
+  MAX_LENGTH_FOR_PASSWORD,
+} from "../../session/types/utility";
 
 export const registerSchema = z.object({
   username: z
