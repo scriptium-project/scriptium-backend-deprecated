@@ -8,18 +8,18 @@ type RoleId = (typeof AvailableRoles)[keyof typeof AvailableRoles]["id"];
 export type User = {
   id: UUID;
   username: string;
-  name?: string | null;
-  surname?: string | null;
-  gender?: "M" | "F" | null;
-  biography?: string | null;
-  email?: string | null;
-  email_verified?: Date | null;
+  name: string;
+  surname: string;
+  gender: "M" | "F" | null;
+  biography: string | null;
+  email: string | null;
+  email_verified: Date | null;
   password: never;
-  created_at?: Date | null;
-  last_active?: Date | null;
-  is_frozen?: Date | null;
-  role_id: RoleId;
+  created_at: Date | null;
+  last_active: Date | null;
+  is_frozen: Date | null;
   is_private?: Date | null;
+  role_id: RoleId;
   preferred_languageid: number;
 };
 

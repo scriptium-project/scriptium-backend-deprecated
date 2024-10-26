@@ -108,6 +108,6 @@ export const Scriptures = {
   b: 2, //Bible.
 } as const;
 
-export const new Error("Something went unexpectedly wrong??"); = new Error(
-  "Something went unexpectedly wrong?"
+export const SomethingWentWrongError = new Error(
+  "Something went unexpectedly wrong??"
 );
